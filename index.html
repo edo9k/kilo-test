@@ -2,35 +2,745 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Pixel Runner</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~/$ whoami</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --phosphor-primary: #33ff00;
+            --phosphor-secondary: #22aa00;
+            --phosphor-glow: rgba(51, 255, 0, 0.6);
+            --bg-color: #0a0a0a;
+            --scanline-color: rgba(0, 0, 0, 0.3);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: var(--bg-color);
+            font-family: 'VT323', 'Courier New', monospace;
+            color: var(--phosphor-primary);
+            padding: 20px;
+            position: relative;
+        }
+
+        /* CRT Screen Effects */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .scanlines {
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            animation: scanline-move 0.1s linear infinite;
+        }
+
+        .scanlines::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                180deg,
+                rgba(0, 0, 0, 0.3) 0%,
+                transparent 50%,
+                rgba(0, 0, 0, 0.3) 100%
+            );
+        }
+
+        @keyframes scanline-move {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(2px); }
+        }
+
+        .flicker {
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            5% { opacity: 0.9; }
+            10% { opacity: 0.95; }
+            15% { opacity: 0.98; }
+            20% { opacity: 0.93; }
+            25% { opacity: 0.96; }
+            30% { opacity: 0.99; }
+            35% { opacity: 0.92; }
+            40% { opacity: 0.97; }
+            45% { opacity: 0.94; }
+            50% { opacity: 0.98; }
+            55% { opacity: 0.91; }
+            60% { opacity: 0.96; }
+            65% { opacity: 0.99; }
+            70% { opacity: 0.93; }
+            75% { opacity: 0.97; }
+            80% { opacity: 0.95; }
+            85% { opacity: 0.98; }
+            90% { opacity: 0.92; }
+            95% { opacity: 0.96; }
+            100% { opacity: 0.99; }
+        }
+
+        .glow-effect {
+            text-shadow:
+                0 0 5px var(--phosphor-glow),
+                0 0 10px var(--phosphor-glow),
+                0 0 20px var(--phosphor-glow),
+                0 0 40px var(--phosphor-glow);
+        }
+
+        .screen-curve {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0, 0, 0, 0.4) 90%,
+                rgba(0, 0, 0, 0.8) 100%
+            );
+        }
+
+        /* Main Terminal */
+        .terminal {
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px;
+            font-size: 18px;
+            line-height: 1.4;
+            position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: var(--phosphor-secondary) var(--bg-color);
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: var(--phosphor-secondary);
+            box-shadow: 0 0 5px var(--phosphor-glow);
+        }
+
+        .output-line {
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .output-line.command {
+            color: var(--phosphor-primary);
+            opacity: 0.9;
+        }
+
+        .output-line.response {
+            color: var(--phosphor-secondary);
+            opacity: 0.8;
+        }
+
+        .output-line.error {
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.6);
+        }
+
+        .output-line.success {
+            color: #33ffff;
+            text-shadow: 0 0 10px rgba(51, 255, 255, 0.6);
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .prompt {
+            color: var(--phosphor-primary);
+            margin-right: 10px;
+            white-space: nowrap;
+            text-shadow: 0 0 5px var(--phosphor-glow);
+        }
+
+        #command-input {
+            background: transparent;
+            border: none;
+            color: var(--phosphor-primary);
+            font-family: 'VT323', 'Courier New', monospace;
+            font-size: 18px;
+            flex: 1;
+            outline: none;
+            caret-color: var(--phosphor-primary);
+            text-shadow: 0 0 5px var(--phosphor-glow);
+        }
+
+        .ascii-art {
+            white-space: pre;
+            font-size: 12px;
+            line-height: 12px;
+            margin: 20px 0;
+            opacity: 0.9;
+        }
+
+        .help-item {
+            margin: 5px 0;
+        }
+
+        .help-command {
+            color: var(--phosphor-primary);
+            font-weight: bold;
+        }
+
+        .help-desc {
+            color: var(--phosphor-secondary);
+            opacity: 0.7;
+        }
+
+        .link-item {
+            margin: 8px 0;
+        }
+
+        .link-item a {
+            color: #33ffff;
+            text-decoration: none;
+            text-shadow: 0 0 5px rgba(51, 255, 255, 0.6);
+        }
+
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: var(--phosphor-primary);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .divider {
+            margin: 15px 0;
+            color: var(--phosphor-secondary);
+            opacity: 0.5;
+        }
+    </style>
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="ui">
-            <div id="score">Distance: 0m</div>
-            <div id="high-score">Best: 0m</div>
-        </div>
-        <div id="controls">
-            <button id="btn-left">◀</button>
-            <button id="btn-jump">▲</button>
-            <button id="btn-right">▶</button>
-        </div>
-        <div id="start-screen">
-            <h1>PIXEL RUNNER</h1>
-            <p>A Side-Scrolling Adventure</p>
-            <button id="start-btn">TAP TO START</button>
-        </div>
-        <div id="game-over-screen" style="display:none;">
-            <h1>GAME OVER</h1>
-            <p id="final-score">Distance: 0m</p>
-            <button id="restart-btn">TAP TO RESTART</button>
+    <div class="crt-overlay scanlines"></div>
+    <div class="crt-overlay flicker"></div>
+    <div class="screen-curve"></div>
+
+    <div class="terminal" id="terminal">
+        <div id="output"></div>
+        <div class="input-line">
+            <span class="prompt">guest@portfolio:~$</span>
+            <input type="text" id="command-input" autofocus autocomplete="off" spellcheck="false">
         </div>
     </div>
-    <script src="game.js"></script>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const output = document.getElementById('output');
+        const input = document.getElementById('command-input');
+
+        const commands = {
+            help: {
+                desc: 'Show available commands',
+                action: () => {
+                    const helpText = [
+                        '',
+                        '<div class="ascii-art glow-effect">╔══════════════════════════════════════════╗</div>',
+                        '<div class="ascii-art glow-effect">║     AVAILABLE COMMANDS                  ║</div>',
+                        '<div class="ascii-art glow-effect">╚══════════════════════════════════════════╝</div>',
+                        '',
+                        '<div class="help-item"><span class="help-command">about</span>     <span class="help-desc">- Learn about me</span></div>',
+                        '<div class="help-item"><span class="help-command">skills</span>    <span class="help-desc">- View my technical skills</span></div>',
+                        '<div class="help-item"><span class="help-command">projects</span>  <span class="help-desc">- Browse my projects</span></div>',
+                        '<div class="help-item"><span class="help-command">experience</span> <span class="help-desc">- View work experience</span></div>',
+                        '<div class="help-item"><span class="help-command">education</span> <span class="help-desc">- View education background</span></div>',
+                        '<div class="help-item"><span class="help-command">contact</span>   <span class="help-desc">- Get in touch with me</span></div>',
+                        '<div class="help-item"><span class="help-command">social</span>    <span class="help-desc">- View social media links</span></div>',
+                        '<div class="help-item"><span class="help-command">clear</span>     <span class="help-desc">- Clear the terminal screen</span></div>',
+                        '<div class="help-item"><span class="help-command">matrix</span>    <span class="help-desc">- Enter the matrix</span></div>',
+                        '<div class="help-item"><span class="help-command">date</span>      <span class="help-desc">- Display current date and time</span></div>',
+                        '<div class="help-item"><span class="help-command">fortune</span>   <span class="help-desc">- Get a random fortune</span></div>',
+                        '',
+                    ];
+                    return helpText.join('\n');
+                }
+            },
+
+            about: {
+                desc: 'Learn about me',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ___    _   _  ____   _   _   _____  ____   _____
+ / _ \\  | \\ | ||  _ \\ | | | | | ____||  _ \\ |_   _|
+| |_) | |  \\| || |_) || | | | |  _|  | |_) |  | |
+|  __/  | |\\  ||  __/ | |_| | | |___ |  _ <   | |
+|_|     |_| \\_||_|     \\___/  |_____||_| \\_\\  |_|
+</div>
+
+<div class="output-line response">
+Hello! I'm a passionate developer who loves building things that matter.<br><br>
+
+I specialize in full-stack development with a focus on creating elegant,
+efficient, and user-friendly applications. When I'm not coding, you'll
+find me exploring new technologies, contributing to open source, or
+enjoying a good cup of coffee.<br><br>
+
+I believe in writing clean, maintainable code and constantly learning
+new things. Every day is an opportunity to grow and improve.<br><br>
+
+<span class="output-line success">═══════════════════════════════════════════</span>
+<span class="output-line success">  Current Status: Coding & Learning ✨</span>
+<span class="output-line success">  Location: Earth, Solar System</span>
+<span class="output-line success">  Status: Open to opportunities</span>
+<span class="output-line success">═══════════════════════════════════════════</span>
+</div>`;
+                }
+            },
+
+            skills: {
+                desc: 'View my technical skills',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  _____   _____   _____   _____   _____   _____
+ |  _ \\ / _ \\ \\ / / _ \\ |  __ \\ / _ \\ \\ / / _ \\
+ | |_) | | | \\ V / | | | |  | | | | \\ V / | | |
+ |  _ <| |_| |||||_| | | |  | | |_| |||||_| |
+ |_| \\_\\\\___/ |_| \\___/ |_|  |_|\\___/ |_| \\___/
+</div>
+
+<div class="output-line response">
+<span class="output-line success">▸ Languages & Frameworks:</span>
+  - JavaScript / TypeScript (Node.js, React, Vue)
+  - Python (Django, Flask, FastAPI)
+  - Go, Rust, Java
+  - HTML5, CSS3, Sass<br><br>
+
+<span class="output-line success">▸ Databases:</span>
+  - PostgreSQL, MySQL, MongoDB, Redis
+  - SQLite, Elasticsearch<br><br>
+
+<span class="output-line success">▸ Tools & Platforms:</span>
+  - Git, Docker, Kubernetes, AWS
+  - Linux/Unix, CI/CD, Jenkins
+  - Vim/Neovim, VS Code<br><br>
+
+<span class="output-line success">▸ Soft Skills:</span>
+  - Problem Solving, Team Leadership
+  - Agile/Scrum, Technical Writing
+  - Mentoring, Communication
+</div>`;
+                }
+            },
+
+            projects: {
+                desc: 'Browse my projects',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║            MY PROJECTS                       ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">[1] awesome-project</span>
+    <div class="link-item">
+      A full-stack web application built with React and Node.js<br>
+      Tech: React, Node.js, PostgreSQL, Docker<br>
+      <a href="#">[View on GitHub]</a> <a href="#">[Live Demo]</a>
+    </div>
+
+<span class="output-line success">[2] cli-tool-master</span>
+    <div class="link-item">
+      A powerful command-line tool for developers<br>
+      Tech: Go, Cobra, SQLite<br>
+      <a href="#">[View on GitHub]</a>
+    </div>
+
+<span class="output-line success">[3] data-visualizer</span>
+    <div class="link-item">
+      Interactive data visualization dashboard<br>
+      Tech: D3.js, Python, FastAPI<br>
+      <a href="#">[View on GitHub]</a> <a href="#">[Live Demo]</a>
+    </div>
+
+<span class="output-line success">[4] terminal-portfolio</span>
+    <div class="link-item">
+      This terminal-style portfolio website<br>
+      Tech: HTML, CSS, JavaScript<br>
+      <a href="#">[View Source]</a>
+    </div>
+
+<div class="divider">─────────────────────────────────────────</div>
+<div class="output-line"><span class="help-desc">Type 'project [name]' for more details</span></div>
+</div>`;
+                }
+            },
+
+            experience: {
+                desc: 'View work experience',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║         WORK EXPERIENCE                      ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">[2023 - Present]</span>
+<span class="help-command">Senior Software Engineer</span> @ TechCorp Inc.
+- Lead development of microservices architecture
+- Mentor junior developers and conduct code reviews
+- Improved system performance by 40%<br><br>
+
+<span class="output-line success">[2021 - 2023]</span>
+<span class="help-command">Full Stack Developer</span> @ StartupXYZ
+- Built and maintained React/Node.js applications
+- Implemented CI/CD pipelines reducing deployment time
+- Collaborated with product team on feature development<br><br>
+
+<span class="output-line success">[2019 - 2021]</span>
+<span class="help-command">Software Developer</span> @ Digital Solutions
+- Developed RESTful APIs using Python/Django
+- Created automated testing suites
+- Participated in agile development processes<br><br>
+
+<span class="output-line success">[2018 - 2019]</span>
+<span class="help-command">Junior Developer</span> @ WebAgency Co.
+- Built responsive websites using HTML/CSS/JavaScript
+- Maintained legacy codebases
+- Assisted in client communication
+</div>`;
+                }
+            },
+
+            education: {
+                desc: 'View education background',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║           EDUCATION                          ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">[2014 - 2018]</span>
+<span class="help-command">Bachelor of Science in Computer Science</span>
+University of Technology
+- GPA: 3.8/4.0
+- Specialization in Software Engineering<br>
+- Relevant Coursework: Data Structures, Algorithms, Database Systems,<br>
+  Operating Systems, Computer Networks<br><br>
+
+<span class="output-line success">[2017]</span>
+<span class="help-command">Study Abroad Program</span>
+Technical University of Munich, Germany
+- Focus on Advanced Software Engineering<br><br>
+
+<span class="output-line success">Certifications:</span>
+- AWS Certified Solutions Architect
+- Google Cloud Professional Developer
+- Meta Frontend Developer Certificate
+</div>`;
+                }
+            },
+
+            contact: {
+                desc: 'Get in touch with me',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║          GET IN TOUCH                         ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+Feel free to reach out! I'm always open to new opportunities<br>
+and interesting conversations.<br><br>
+
+<span class="output-line success">📧 Email:</span>  hello@example.com<br>
+<span class="output-line success">💼 LinkedIn:</span>  linkedin.com/in/username<br>
+<span class="output-line success">🐦 Twitter:</span>   @username<br>
+<span class="output-line success">🐙 GitHub:</span>    github.com/username<br><br>
+
+<span class="help-desc">Or send me a message directly through the contact form on my website.</span>
+</div>`;
+                }
+            },
+
+            social: {
+                desc: 'View social media links',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║          CONNECT WITH ME                     ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<div class="link-item">
+  <span class="output-line success">[GitHub]</span>    <a href="#">https://github.com/username</a>
+</div>
+<div class="link-item">
+  <span class="output-line success">[LinkedIn]</span>  <a href="#">https://linkedin.com/in/username</a>
+</div>
+<div class="link-item">
+  <span class="output-line success">[Twitter]</span>   <a href="#">https://twitter.com/username</a>
+</div>
+<div class="link-item">
+  <span class="output-line success">[Blog]</span>      <a href="#">https://myblog.dev</a>
+</div>
+<div class="link-item">
+  <span class="output-line success">[Resume]</span>    <a href="#">https://example.com/resume.pdf</a>
+</div>
+</div>`;
+                }
+            },
+
+            clear: {
+                desc: 'Clear the terminal screen',
+                action: () => {
+                    output.innerHTML = '';
+                    return null;
+                }
+            },
+
+            matrix: {
+                desc: 'Enter the matrix',
+                action: () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.id = 'matrix-canvas';
+                    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;background:#000;';
+                    document.body.appendChild(canvas);
+
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+
+                    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+                    const fontSize = 14;
+                    const columns = canvas.width / fontSize;
+                    const drops = Array(Math.floor(columns)).fill(1);
+
+                    function drawMatrix() {
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                        ctx.fillStyle = '#0F0';
+                        ctx.font = fontSize + 'px monospace';
+
+                        for (let i = 0; i < drops.length; i++) {
+                            const text = chars[Math.floor(Math.random() * chars.length)];
+                            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                                drops[i] = 0;
+                            }
+                            drops[i]++;
+                        }
+                    }
+
+                    const matrixInterval = setInterval(drawMatrix, 33);
+
+                    setTimeout(() => {
+                        clearInterval(matrixInterval);
+                        canvas.remove();
+                        return '<div class="output-line success">You took the red pill. Welcome back.</div>';
+                    }, 5000);
+
+                    return '<div class="output-line success">Entering the Matrix... Press ESC to exit</div>';
+                }
+            },
+
+            date: {
+                desc: 'Display current date and time',
+                action: () => {
+                    return `<div class="output-line response">${new Date().toString()}</div>`;
+                }
+            },
+
+            fortune: {
+                desc: 'Get a random fortune',
+                action: () => {
+                    const fortunes = [
+                        'The best way to predict the future is to create it.',
+                        'Code is like humor. When you have to explain it, it\'s bad.',
+                        'First, solve the problem. Then, write the code.',
+                        'Simplicity is the soul of efficiency.',
+                        'Experience is the name everyone gives to their mistakes.',
+                        'The only way to do great work is to love what you do.',
+                        'Stay hungry, stay foolish.',
+                        'Talk is cheap. Show me the code.',
+                        'Programs must be written for people to read.',
+                        'Any fool can write code that a computer can understand.'
+                    ];
+                    const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+                    return `<div class="output-line success">━━━ Fortune ━━━${' '.repeat(20)}\n  "${fortune}"\n━━━━━━━━━━━━━━━━</div>`;
+                }
+            },
+
+            whoami: {
+                desc: 'Who am I?',
+                action: () => {
+                    return `<div class="output-line response">guest@portfolio:~$ whoami\nYou are a curious visitor exploring this terminal portfolio. Welcome!</div>`;
+                }
+            },
+
+            ls: {
+                desc: 'List directory contents',
+                action: () => {
+                    return `<div class="output-line response">about/  skills/  projects/  experience/  education/  contact/  README.md</div>`;
+                }
+            },
+
+            pwd: {
+                desc: 'Print working directory',
+                action: () => {
+                    return `<div class="output-line response">/home/guest/portfolio</div>`;
+                }
+            },
+
+            neofetch: {
+                desc: 'System information',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+        .--.        guest@portfolio
+       |o_o |       ---------------
+       |:_/ |       OS: Portfolio OS v2.0
+      //   \\ \\      Host: Web Browser
+     (|     | )     Kernel: JavaScript ES6+
+    /'\\_   _/\`\\     Uptime: Since 2018
+    \\___)=(___/     Shell: Web Terminal
+                    Resolution: ${window.innerWidth}x${window.innerHeight}
+                    Theme: Phosphor Green
+                    CPU: Your Browser
+                    Memory: Available RAM
+</div>`;
+                }
+            },
+
+            banner: {
+                desc: 'Display welcome banner',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════════════╗
+  ║                                                      ║
+  ║   ██████╗ ██╗   ██╗████████╗██████╗  ██████╗        ║
+  ║  ██╔═══██╗██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗       ║
+  ║  ██║   ██║██║   ██║   ██║   ██████╔╝██║   ██║       ║
+  ║  ██║   ██║██║   ██║   ██║   ██╔══██╗██║   ██║       ║
+  ║  ╚██████╔╝╚██████╔╝   ██║   ██║  ██║╚██████╔╝       ║
+  ║   ╚═════╝  ╚═════╝    ╚═╝   ╚═╝  ╚═╝ ╚═════╝        ║
+  ║                                                      ║
+  ║         WELCOME TO MY TERMINAL PORTFOLIO             ║
+  ║                                                      ║
+  ║   Type 'help' to see available commands               ║
+  ║                                                      ║
+  ╚══════════════════════════════════════════════════════╝
+</div>`;
+                }
+            }
+        };
+
+        function addOutput(text, className = 'response') {
+            if (text === null) return;
+
+            const line = document.createElement('div');
+            line.className = `output-line ${className}`;
+            line.innerHTML = text;
+            output.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function executeCommand(cmd) {
+            const trimmedCmd = cmd.trim().toLowerCase();
+            const [command, ...args] = trimmedCmd.split(' ');
+
+            addOutput(`<span class="command">guest@portfolio:~$ ${cmd}</span>`, 'command');
+
+            if (command === '') return;
+
+            if (commands[command]) {
+                const result = commands[command].action();
+                if (result !== null) {
+                    addOutput(result);
+                }
+            } else {
+                addOutput(`<span class="error">Command not found: ${command}. Type 'help' for available commands.</span>`, 'error');
+            }
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                executeCommand(input.value);
+                input.value = '';
+            }
+        });
+
+        terminal.addEventListener('click', () => {
+            input.focus();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('matrix-canvas')?.remove();
+            }
+        });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                addOutput(commands.banner.action());
+                addOutput(`<div class="output-line response">Welcome! I'm loading your experience...<br>Type 'help' to get started.</div>`);
+                input.focus();
+            }, 500);
+        });
+    </script>
 </body>
 </html>
