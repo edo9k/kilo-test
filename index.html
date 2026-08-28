@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>~/$ whoami</title>
+    <title>~/$ Eduardo França - Systems Engineer</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
@@ -34,7 +34,6 @@
             position: relative;
         }
 
-        /* CRT Screen Effects */
         .crt-overlay {
             position: fixed;
             top: 0;
@@ -128,7 +127,6 @@
             );
         }
 
-        /* Main Terminal */
         .terminal {
             height: 100vh;
             overflow-y: auto;
@@ -268,7 +266,7 @@
     <div class="terminal" id="terminal">
         <div id="output"></div>
         <div class="input-line">
-            <span class="prompt">guest@portfolio:~$</span>
+            <span class="prompt">visitor@eduardo:~$</span>
             <input type="text" id="command-input" autofocus autocomplete="off" spellcheck="false">
         </div>
     </div>
@@ -290,15 +288,22 @@
                         '',
                         '<div class="help-item"><span class="help-command">about</span>     <span class="help-desc">- Learn about me</span></div>',
                         '<div class="help-item"><span class="help-command">skills</span>    <span class="help-desc">- View my technical skills</span></div>',
-                        '<div class="help-item"><span class="help-command">projects</span>  <span class="help-desc">- Browse my projects</span></div>',
                         '<div class="help-item"><span class="help-command">experience</span> <span class="help-desc">- View work experience</span></div>',
                         '<div class="help-item"><span class="help-command">education</span> <span class="help-desc">- View education background</span></div>',
+                        '<div class="help-item"><span class="help-command">certifications</span> <span class="help-desc">- View certifications</span></div>',
+                        '<div class="help-item"><span class="help-command">languages</span> <span class="help-desc">- View spoken languages</span></div>',
+                        '<div class="help-item"><span class="help-command">interests</span> <span class="help-desc">- View my interests</span></div>',
+                        '<div class="help-item"><span class="help-command">recommendations</span> <span class="help-desc">- View recommendations</span></div>',
                         '<div class="help-item"><span class="help-command">contact</span>   <span class="help-desc">- Get in touch with me</span></div>',
                         '<div class="help-item"><span class="help-command">social</span>    <span class="help-desc">- View social media links</span></div>',
                         '<div class="help-item"><span class="help-command">clear</span>     <span class="help-desc">- Clear the terminal screen</span></div>',
                         '<div class="help-item"><span class="help-command">matrix</span>    <span class="help-desc">- Enter the matrix</span></div>',
                         '<div class="help-item"><span class="help-command">date</span>      <span class="help-desc">- Display current date and time</span></div>',
                         '<div class="help-item"><span class="help-command">fortune</span>   <span class="help-desc">- Get a random fortune</span></div>',
+                        '<div class="help-item"><span class="help-command">whoami</span>    <span class="help-desc">- Who am I?</span></div>',
+                        '<div class="help-item"><span class="help-command">ls</span>        <span class="help-desc">- List directory contents</span></div>',
+                        '<div class="help-item"><span class="help-command">pwd</span>       <span class="help-desc">- Print working directory</span></div>',
+                        '<div class="help-item"><span class="help-command">neofetch</span>  <span class="help-desc">- System information</span></div>',
                         '',
                     ];
                     return helpText.join('\n');
@@ -318,20 +323,26 @@
 </div>
 
 <div class="output-line response">
-Hello! I'm a passionate developer who loves building things that matter.<br><br>
+Hello! I'm Eduardo França, a Systems Engineer with over a decade of experience<br>
+building software across web, cloud, and infrastructure domains.<br><br>
 
-I specialize in full-stack development with a focus on creating elegant,
-efficient, and user-friendly applications. When I'm not coding, you'll
-find me exploring new technologies, contributing to open source, or
-enjoying a good cup of coffee.<br><br>
+Currently at <span class="output-line success">Encora Inc.</span>, I develop and maintain Python-based software<br>
+for managing StarlingX, Kubernetes, and OpenStack solutions, optimizing<br>
+cloud-native infrastructure at the edge for telecom, automotive, and manufacturing.<br><br>
 
-I believe in writing clean, maintainable code and constantly learning
-new things. Every day is an opportunity to grow and improve.<br><br>
+Previously, I spent time at <span class="output-line success">IBM</span> building internal tools with Python,<br>
+Javascript, and Postgres on IBM Cloud, and at <span class="output-line success">UFES</span> where I built<br>
+full-stack applications for distance learning using Laravel, Node.js, and React.<br><br>
+
+My main interests are <span class="output-line success">Computer Science</span>, the <span class="output-line success">History of Computing</span>,<br>
+and <span class="output-line success">Language Learning</span>. I'm also very curious about <span class="output-line success">Formal Proof systems</span>.<br><br>
+
+I've been teaching English in the past, and I still find joy in bridging<br>
+communication gaps between technology and people.<br><br>
 
 <span class="output-line success">═══════════════════════════════════════════</span>
-<span class="output-line success">  Current Status: Coding & Learning ✨</span>
-<span class="output-line success">  Location: Earth, Solar System</span>
-<span class="output-line success">  Status: Open to opportunities</span>
+<span class="output-line success">  Location: Serra, Espirito Santo, Brazil</span>
+<span class="output-line success">  Status: Open to interesting conversations</span>
 <span class="output-line success">═══════════════════════════════════════════</span>
 </div>`;
                 }
@@ -350,70 +361,28 @@ new things. Every day is an opportunity to grow and improve.<br><br>
 </div>
 
 <div class="output-line response">
-<span class="output-line success">▸ Languages & Frameworks:</span>
-  - JavaScript / TypeScript (Node.js, React, Vue)
-  - Python (Django, Flask, FastAPI)
-  - Go, Rust, Java
-  - HTML5, CSS3, Sass<br><br>
+<span class="output-line success">▸ Primary Languages:</span>
+  - Python (StarlingX, Kubernetes, OpenStack, cloud-native tooling)
+  - JavaScript / TypeScript (Node.js, React, frontend tooling)
+  - PHP (Laravel, legacy web applications)
+  - C# (Microsoft .NET, government systems)<br><br>
 
 <span class="output-line success">▸ Databases:</span>
-  - PostgreSQL, MySQL, MongoDB, Redis
-  - SQLite, Elasticsearch<br><br>
+  - PostgreSQL, MySQL, SQL Server
+  - Database design and optimization<br><br>
 
-<span class="output-line success">▸ Tools & Platforms:</span>
-  - Git, Docker, Kubernetes, AWS
-  - Linux/Unix, CI/CD, Jenkins
-  - Vim/Neovim, VS Code<br><br>
+<span class="output-line success">▸ Frameworks & Tools:</span>
+  - Node.js, Express, React, Bootstrap
+  - Laravel, PowerShell, Docker, Kubernetes
+  - IBM Cloud products, third-party API integration<br><br>
 
-<span class="output-line success">▸ Soft Skills:</span>
-  - Problem Solving, Team Leadership
-  - Agile/Scrum, Technical Writing
-  - Mentoring, Communication
-</div>`;
-                }
-            },
-
-            projects: {
-                desc: 'Browse my projects',
-                action: () => {
-                    return `
-<div class="ascii-art glow-effect">
-  ╔══════════════════════════════════════════════╗
-  ║            MY PROJECTS                       ║
-  ╚══════════════════════════════════════════════╝
-</div>
-
-<div class="output-line response">
-<span class="output-line success">[1] awesome-project</span>
-    <div class="link-item">
-      A full-stack web application built with React and Node.js<br>
-      Tech: React, Node.js, PostgreSQL, Docker<br>
-      <a href="#">[View on GitHub]</a> <a href="#">[Live Demo]</a>
-    </div>
-
-<span class="output-line success">[2] cli-tool-master</span>
-    <div class="link-item">
-      A powerful command-line tool for developers<br>
-      Tech: Go, Cobra, SQLite<br>
-      <a href="#">[View on GitHub]</a>
-    </div>
-
-<span class="output-line success">[3] data-visualizer</span>
-    <div class="link-item">
-      Interactive data visualization dashboard<br>
-      Tech: D3.js, Python, FastAPI<br>
-      <a href="#">[View on GitHub]</a> <a href="#">[Live Demo]</a>
-    </div>
-
-<span class="output-line success">[4] terminal-portfolio</span>
-    <div class="link-item">
-      This terminal-style portfolio website<br>
-      Tech: HTML, CSS, JavaScript<br>
-      <a href="#">[View Source]</a>
-    </div>
-
-<div class="divider">─────────────────────────────────────────</div>
-<div class="output-line"><span class="help-desc">Type 'project [name]' for more details</span></div>
+<span class="output-line success">▸ Core Competencies:</span>
+  - Full-stack web development
+  - Cloud-native infrastructure at the edge
+  - Internal tools and CLI utilities
+  - REST API design and implementation
+  - Frontend & backend development
+  - Infrastructure maintenance and IT consulting
 </div>`;
                 }
             },
@@ -429,29 +398,42 @@ new things. Every day is an opportunity to grow and improve.<br><br>
 </div>
 
 <div class="output-line response">
-<span class="output-line success">[2023 - Present]</span>
-<span class="help-command">Senior Software Engineer</span> @ TechCorp Inc.
-- Lead development of microservices architecture
-- Mentor junior developers and conduct code reviews
-- Improved system performance by 40%<br><br>
+<span class="output-line success">[Dec 2024 - Present]</span>
+<span class="help-command">Systems Engineer</span> @ Encora Inc.
+- Develop and maintain Python-based software for managing StarlingX,<br>
+  Kubernetes and OpenStack solutions, optimizing cloud-native infrastructure<br>
+  at the edge, with a focus on industries such as telecom, automotive,<br>
+  and manufacturing.<br><br>
 
-<span class="output-line success">[2021 - 2023]</span>
-<span class="help-command">Full Stack Developer</span> @ StartupXYZ
-- Built and maintained React/Node.js applications
-- Implemented CI/CD pipelines reducing deployment time
-- Collaborated with product team on feature development<br><br>
+<span class="output-line success">[Apr 2022 - Dec 2024]</span>
+<span class="help-command">Application Developer</span> @ IBM
+- Application Development, Frontend, Backend, CLI tools
+- Development for Internal tools (Web Applications, and CLI utilities),<br>
+  built on IBM Cloud products, with Python, Javascript, Postgres,<br>
+  PowerShell, and third party APIs.<br><br>
 
-<span class="output-line success">[2019 - 2021]</span>
-<span class="help-command">Software Developer</span> @ Digital Solutions
-- Developed RESTful APIs using Python/Django
-- Created automated testing suites
-- Participated in agile development processes<br><br>
+<span class="output-line success">[Jul 2016 - Apr 2022]</span>
+<span class="help-command">Web Developer</span> @ Federal University of Espirito Santo (UFES)
+- Built the Acervo library, displaying books and resources for distance<br>
+  learning students. PHP with Laravel, Javascript, Bootstrap, MySQL.
+- Backend for Sistema de Seleicao: Rest API built with Node, Express,<br>
+  and MySQL, with a React frontend.<br><br>
 
-<span class="output-line success">[2018 - 2019]</span>
-<span class="help-command">Junior Developer</span> @ WebAgency Co.
-- Built responsive websites using HTML/CSS/JavaScript
-- Maintained legacy codebases
-- Assisted in client communication
+<span class="output-line success">[Aug 2015 - Jul 2016]</span>
+<span class="help-command">Bolsista (Scholarship Student) - CAPES</span> @ UFES
+- Research and Development at LIEd (Laboratory for Information Technology<br>
+  in Education). Research, propose, design and develop technologies to<br>
+  support students and educators in school settings.<br><br>
+
+<span class="output-line success">[Jun 2010 - Feb 2012]</span>
+<span class="help-command">Technology Analyst - Development</span> @ Espirito Santo State Government
+- Customize and maintain web pages for the government of Espirito Santo.
+- Development of web applications in Microsoft .NET technology.<br><br>
+
+<span class="output-line success">[Jul 2008 - Jan 2009]</span>
+<span class="help-command">Software Engineer</span> @ Objetiva Solucoes
+- Plan, Implement and Maintain components of Objetiva's commercial<br>
+  automation system.
 </div>`;
                 }
             },
@@ -467,23 +449,119 @@ new things. Every day is an opportunity to grow and improve.<br><br>
 </div>
 
 <div class="output-line response">
-<span class="output-line success">[2014 - 2018]</span>
-<span class="help-command">Bachelor of Science in Computer Science</span>
-University of Technology
-- GPA: 3.8/4.0
-- Specialization in Software Engineering<br>
-- Relevant Coursework: Data Structures, Algorithms, Database Systems,<br>
-  Operating Systems, Computer Networks<br><br>
+<span class="output-line success">[2014 - 2017]</span>
+<span class="help-command">Master of Computer Science (MSc)</span>
+Universidade Federal do Espirito Santo (UFES)
+- Computer Science<br><br>
 
-<span class="output-line success">[2017]</span>
-<span class="help-command">Study Abroad Program</span>
-Technical University of Munich, Germany
-- Focus on Advanced Software Engineering<br><br>
+<span class="output-line success">[2005 - 2009]</span>
+<span class="help-command">Bachelor of Computer Information Systems</span>
+Faculdade Pitagoras
+- COMPUTER AND INFORMATION SCIENCES AND SUPPORT SERVICES
+</div>`;
+                }
+            },
 
-<span class="output-line success">Certifications:</span>
-- AWS Certified Solutions Architect
-- Google Cloud Professional Developer
-- Meta Frontend Developer Certificate
+            certifications: {
+                desc: 'View certifications',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║         CERTIFICATIONS                      ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">[Oct 2021]</span>
+<span class="help-command">Dive into Refactoring</span>
+Refactoring.Guru<br><br>
+
+<span class="output-line success">[Aug 2021]</span>
+<span class="help-command">API Test Automation with Postman</span>
+TestAutomationU<br><br>
+
+<span class="output-line success">[Mar 2020]</span>
+<span class="help-command">Product School Certificate</span>
+Product School<br><br>
+
+<span class="output-line success">[Feb 2018]</span>
+<span class="help-command">Learn React Course</span>
+Codecademy
+</div>`;
+                }
+            },
+
+            languages: {
+                desc: 'View spoken languages',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║           LANGUAGES                          ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">Portuguese</span>  - Native or bilingual proficiency
+<span class="output-line success">English</span>     - Native or bilingual proficiency
+<span class="output-line success">Spanish</span>     - Limited working proficiency
+<span class="output-line success">German</span>      - Limited working proficiency
+</div>`;
+                }
+            },
+
+            interests: {
+                desc: 'View my interests',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║           INTERESTS                          ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">▸ Computer Science</span>
+  Deep fascination with algorithms, computation theory, and the<br>
+  foundations of how computers work.<br><br>
+
+<span class="output-line success">▸ History of Computing</span>
+  Exploring how computing evolved from early machines to modern<br>
+  cloud infrastructure and beyond.<br><br>
+
+<span class="output-line success">▸ Language Learning</span>
+  Passionate about learning new languages and understanding<br>
+  how they shape thought and culture.<br><br>
+
+<span class="output-line success">▸ Formal Proof Systems</span>
+  Very curious about mathematical logic, theorem proving, and<br>
+  the rigor of formal verification.
+</div>`;
+                }
+            },
+
+            recommendations: {
+                desc: 'View recommendations',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║       RECOMMENDATIONS                       ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="help-command">Peter Safwat</span>
+<span class="help-desc">"I had the pleasure of working with Eduardo for nearly three years and<br>
+witnessed nothing but dedication and commitment. He is incredibly helpful,<br>
+resourceful, and highly skilled in his field. Eduardo consistently went above<br>
+and beyond to assist others, even when he didn't have the immediate answer,<br>
+he would make the effort to find it. Working with him was truly a rewarding<br>
+experience."</span><br><br>
+
+<span class="help-command">Renato DelPupo</span>
+<span class="help-desc">"Eduardo is restless."</span>
 </div>`;
                 }
             },
@@ -502,12 +580,12 @@ Technical University of Munich, Germany
 Feel free to reach out! I'm always open to new opportunities<br>
 and interesting conversations.<br><br>
 
-<span class="output-line success">📧 Email:</span>  hello@example.com<br>
-<span class="output-line success">💼 LinkedIn:</span>  linkedin.com/in/username<br>
-<span class="output-line success">🐦 Twitter:</span>   @username<br>
-<span class="output-line success">🐙 GitHub:</span>    github.com/username<br><br>
+<span class="output-line success">📧 Email:</span>  eduardo@example.com<br>
+<span class="output-line success">💼 LinkedIn:</span>  linkedin.com/in/eduardofranca<br>
+<span class="output-line success">🐙 GitHub:</span>    github.com/edo9k<br>
+<span class="output-line success">🐘 Mastodon:</span>  @edo9k@mastodon.sdf.org<br><br>
 
-<span class="help-desc">Or send me a message directly through the contact form on my website.</span>
+<span class="help-desc">I'm based in Serra, Espirito Santo, Brazil.</span>
 </div>`;
                 }
             },
@@ -524,19 +602,13 @@ and interesting conversations.<br><br>
 
 <div class="output-line response">
 <div class="link-item">
-  <span class="output-line success">[GitHub]</span>    <a href="#">https://github.com/username</a>
+  <span class="output-line success">[GitHub]</span>    <a href="https://github.com/edo9k" target="_blank">https://github.com/edo9k</a>
 </div>
 <div class="link-item">
-  <span class="output-line success">[LinkedIn]</span>  <a href="#">https://linkedin.com/in/username</a>
+  <span class="output-line success">[LinkedIn]</span>  <a href="https://linkedin.com/in/eduardofranca" target="_blank">https://linkedin.com/in/eduardofranca</a>
 </div>
 <div class="link-item">
-  <span class="output-line success">[Twitter]</span>   <a href="#">https://twitter.com/username</a>
-</div>
-<div class="link-item">
-  <span class="output-line success">[Blog]</span>      <a href="#">https://myblog.dev</a>
-</div>
-<div class="link-item">
-  <span class="output-line success">[Resume]</span>    <a href="#">https://example.com/resume.pdf</a>
+  <span class="output-line success">[Mastodon]</span>  <a href="https://mastodon.sdf.org/@edo9k" target="_blank">@edo9k@mastodon.sdf.org</a>
 </div>
 </div>`;
                 }
@@ -620,28 +692,28 @@ and interesting conversations.<br><br>
                         'Any fool can write code that a computer can understand.'
                     ];
                     const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-                    return `<div class="output-line success">━━━ Fortune ━━━${' '.repeat(20)}\n  "${fortune}"\n━━━━━━━━━━━━━━━━</div>`;
+                    return `<div class="output-line success">━━━ Fortune ━━━${' '.repeat(20)}\n  "${fortune}"\n━━━━━━━━━━━━━━━━━━━━━━━━</div>`;
                 }
             },
 
             whoami: {
                 desc: 'Who am I?',
                 action: () => {
-                    return `<div class="output-line response">guest@portfolio:~$ whoami\nYou are a curious visitor exploring this terminal portfolio. Welcome!</div>`;
+                    return `<div class="output-line response">visitor@eduardo:~$ whoami\nYou are a curious visitor exploring Eduardo's terminal portfolio. Welcome!</div>`;
                 }
             },
 
             ls: {
                 desc: 'List directory contents',
                 action: () => {
-                    return `<div class="output-line response">about/  skills/  projects/  experience/  education/  contact/  README.md</div>`;
+                    return `<div class="output-line response">about/  skills/  experience/  education/  certifications/  languages/  interests/  recommendations/  contact/  social/  README.md</div>`;
                 }
             },
 
             pwd: {
                 desc: 'Print working directory',
                 action: () => {
-                    return `<div class="output-line response">/home/guest/portfolio</div>`;
+                    return `<div class="output-line response">/home/visitor/eduardo-portfolio</div>`;
                 }
             },
 
@@ -650,17 +722,17 @@ and interesting conversations.<br><br>
                 action: () => {
                     return `
 <div class="ascii-art glow-effect">
-        .--.        guest@portfolio
+        .--.        visitor@eduardo
        |o_o |       ---------------
        |:_/ |       OS: Portfolio OS v2.0
       //   \\ \\      Host: Web Browser
      (|     | )     Kernel: JavaScript ES6+
-    /'\\_   _/\`\\     Uptime: Since 2018
+    /'\\_   _/\`\\     Uptime: Since 2024
     \\___)=(___/     Shell: Web Terminal
                     Resolution: ${window.innerWidth}x${window.innerHeight}
                     Theme: Phosphor Green
-                    CPU: Your Browser
-                    Memory: Available RAM
+                    User: Eduardo Franca
+                    Location: Serra, ES, Brazil
 </div>`;
                 }
             },
@@ -679,7 +751,10 @@ and interesting conversations.<br><br>
   ║  ╚██████╔╝╚██████╔╝   ██║   ██║  ██║╚██████╔╝       ║
   ║   ╚═════╝  ╚═════╝    ╚═╝   ╚═╝  ╚═╝ ╚═════╝        ║
   ║                                                      ║
-  ║         WELCOME TO MY TERMINAL PORTFOLIO             ║
+  ║         WELCOME TO EDUARDO'S PORTFOLIO              ║
+  ║                                                      ║
+  ║   Systems Engineer | Encora Inc.                     ║
+  ║   Serra, Espirito Santo, Brazil                      ║
   ║                                                      ║
   ║   Type 'help' to see available commands               ║
   ║                                                      ║
@@ -703,7 +778,7 @@ and interesting conversations.<br><br>
             const trimmedCmd = cmd.trim().toLowerCase();
             const [command, ...args] = trimmedCmd.split(' ');
 
-            addOutput(`<span class="command">guest@portfolio:~$ ${cmd}</span>`, 'command');
+            addOutput(`<span class="command">visitor@eduardo:~$ ${cmd}</span>`, 'command');
 
             if (command === '') return;
 
@@ -737,7 +812,7 @@ and interesting conversations.<br><br>
         window.addEventListener('load', () => {
             setTimeout(() => {
                 addOutput(commands.banner.action());
-                addOutput(`<div class="output-line response">Welcome! I'm loading your experience...<br>Type 'help' to get started.</div>`);
+                addOutput(`<div class="output-line response">Welcome! I'm loading Eduardo's experience...<br>Type 'help' to get started.</div>`);
                 input.focus();
             }, 500);
         });
