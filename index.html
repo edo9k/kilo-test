@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Pixel Runner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui">
+            <div id="score">Distance: 0m</div>
+            <div id="high-score">Best: 0m</div>
+        </div>
+        <div id="controls">
+            <button id="btn-left">◀</button>
+            <button id="btn-jump">▲</button>
+            <button id="btn-right">▶</button>
+        </div>
+        <div id="start-screen">
+            <h1>PIXEL RUNNER</h1>
+            <p>A Side-Scrolling Adventure</p>
+            <button id="start-btn">TAP TO START</button>
+        </div>
+        <div id="game-over-screen" style="display:none;">
+            <h1>GAME OVER</h1>
+            <p id="final-score">Distance: 0m</p>
+            <button id="restart-btn">TAP TO RESTART</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
