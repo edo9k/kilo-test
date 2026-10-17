@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8s Wordle Tests</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #111; color: #0f0; }
+        .pass { color: #0f0; }
+        .fail { color: #f00; font-weight: bold; }
+        .test { margin: 4px 0; }
+    </style>
+</head>
+<body>
+    <h1>K8s Wordle Engine Tests</h1>
+    <div id="results"></div>
+    
+    <script src="../data/words.js"></script>
+    <script src="../js/engine.js"></script>
+    <script>
+        const results = document.getElementById('results');
+        let passed = 0, failed = 0;
+        
+        function assert(name, cond) {
+            if (cond) {
+                results.innerHTML += `<div class="test pass">✓ ${name}</div>`;
+                passed++;
+            } else {
+                results.innerHTML += `<div class="test fail">✗ ${name}</div>`;
+                failed++;
+            }
+        }
+        
+        // Test computeFeedback
+        let fb = computeFeedback('pod', 'pod');
+        assert('Exact match correct', fb.every(f => f.status === 'correct'));
+        
+        fb = computeFeedback('pod', 'pop');
+        assert('Mixed feedback', fb[0].status === 'correct' && fb[2].status === 'present');
+        
+        fb = computeFeedback('abc', 'def');
+        assert('All absent', fb.every(f => f.status === 'absent'));
+        
+        // Test pickWord
+        const w = pickWord(5, WORD_BUCKETS);
+        assert('pickWord returns word', w && typeof w === 'string');
+        assert('pickWord length matches', w && w.length === 5);
+        
+        // Test validateGuess
+        assert('validateGuess accepts known word', validateGuess('pod', 3, ALLOWED_GUESSES) === true);
+        assert('validateGuess rejects wrong length', validateGuess('pod', 4, ALLOWED_GUESSES) === false);
+        assert('validateGuess rejects invalid chars', validateGuess('p0d', 3, ALLOWED_GUESSES) === false);
+        
+        // Test word bank completeness
+        for (let len = 3; len <= 10; len++) {
+            assert(`WORDS for length ${len} >= 30`, (WORD_BUCKETS[len] && WORD_BUCKETS[len].length >= 30));
+        }
+        
+        // Test no empty meanings missing major terms
+        assert('pod has meaning', WORD_MEANINGS.pod && WORD_MEANINGS.pod.meaning);
+        assert('deployment has meaning', WORD_MEANINGS.deployment && WORD_MEANINGS.deployment.meaning);
+        
+        results.innerHTML += `<hr><div>Total: ${passed + failed}, Passed: ${passed}, Failed: ${failed}</div>`;
+    </script>
+</body>
+</html>
