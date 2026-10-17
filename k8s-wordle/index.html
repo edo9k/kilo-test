@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Wordle</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>K8s Wordle</h1>
+            <div class="mode-picker">
+                <label for="wordLength">Word Length:</label>
+                <select id="wordLength">
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5" selected>5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+                <button id="newGameBtn" class="btn">New Game</button>
+            </div>
+        </header>
+
+        <div id="board" class="board" aria-label="Game board"></div>
+        
+        <div id="keyboard" class="keyboard" aria-label="Keyboard"></div>
+        
+        <div id="result" class="result" style="display:none;"></div>
+        
+        <div class="stats-section">
+            <h2>Stats</h2>
+            <div id="overallStats" class="overall-stats"></div>
+            <div id="groupStats" class="group-stats"></div>
+            <button id="resetStatsBtn" class="btn btn-danger">Reset Stats</button>
+        </div>
+    </div>
+
+    <script src="data/words.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
