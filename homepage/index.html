@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~/$ Eduardo França - Systems Engineer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --phosphor-primary: #33ff00;
+            --phosphor-secondary: #22aa00;
+            --phosphor-glow: rgba(51, 255, 0, 0.6);
+            --bg-color: #0a0a0a;
+            --scanline-color: rgba(0, 0, 0, 0.3);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: var(--bg-color);
+            font-family: 'VT323', 'Courier New', monospace;
+            color: var(--phosphor-primary);
+            padding: 20px;
+            position: relative;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .scanlines {
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            animation: scanline-move 0.1s linear infinite;
+        }
+
+        .scanlines::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                180deg,
+                rgba(0, 0, 0, 0.3) 0%,
+                transparent 50%,
+                rgba(0, 0, 0, 0.3) 100%
+            );
+        }
+
+        @keyframes scanline-move {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(2px); }
+        }
+
+        .flicker {
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            5% { opacity: 0.9; }
+            10% { opacity: 0.95; }
+            15% { opacity: 0.98; }
+            20% { opacity: 0.93; }
+            25% { opacity: 0.96; }
+            30% { opacity: 0.99; }
+            35% { opacity: 0.92; }
+            40% { opacity: 0.97; }
+            45% { opacity: 0.94; }
+            50% { opacity: 0.98; }
+            55% { opacity: 0.91; }
+            60% { opacity: 0.96; }
+            65% { opacity: 0.99; }
+            70% { opacity: 0.93; }
+            75% { opacity: 0.97; }
+            80% { opacity: 0.95; }
+            85% { opacity: 0.98; }
+            90% { opacity: 0.92; }
+            95% { opacity: 0.96; }
+            100% { opacity: 0.99; }
+        }
+
+        .glow-effect {
+            text-shadow:
+                0 0 5px var(--phosphor-glow),
+                0 0 10px var(--phosphor-glow),
+                0 0 20px var(--phosphor-glow),
+                0 0 40px var(--phosphor-glow);
+        }
+
+        .screen-curve {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0, 0, 0, 0.4) 90%,
+                rgba(0, 0, 0, 0.8) 100%
+            );
+        }
+
+        .terminal {
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px;
+            font-size: 18px;
+            line-height: 1.4;
+            position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: var(--phosphor-secondary) var(--bg-color);
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: var(--phosphor-secondary);
+            box-shadow: 0 0 5px var(--phosphor-glow);
+        }
+
+        .output-line {
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .output-line.command {
+            color: var(--phosphor-primary);
+            opacity: 0.9;
+        }
+
+        .output-line.response {
+            color: var(--phosphor-secondary);
+            opacity: 0.8;
+        }
+
+        .output-line.error {
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.6);
+        }
+
+        .output-line.success {
+            color: #33ffff;
+            text-shadow: 0 0 10px rgba(51, 255, 255, 0.6);
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .prompt {
+            color: var(--phosphor-primary);
+            margin-right: 10px;
+            white-space: nowrap;
+            text-shadow: 0 0 5px var(--phosphor-glow);
+        }
+
+        #command-input {
+            background: transparent;
+            border: none;
+            color: var(--phosphor-primary);
+            font-family: 'VT323', 'Courier New', monospace;
+            font-size: 18px;
+            flex: 1;
+            outline: none;
+            caret-color: var(--phosphor-primary);
+            text-shadow: 0 0 5px var(--phosphor-glow);
+        }
+
+        .ascii-art {
+            white-space: pre;
+            font-size: 12px;
+            line-height: 12px;
+            margin: 20px 0;
+            opacity: 0.9;
+        }
+
+        .help-item {
+            margin: 5px 0;
+        }
+
+        .help-command {
+            color: var(--phosphor-primary);
+            font-weight: bold;
+        }
+
+        .help-desc {
+            color: var(--phosphor-secondary);
+            opacity: 0.7;
+        }
+
+        .link-item {
+            margin: 8px 0;
+        }
+
+        .link-item a {
+            color: #33ffff;
+            text-decoration: none;
+            text-shadow: 0 0 5px rgba(51, 255, 255, 0.6);
+        }
+
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: var(--phosphor-primary);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .divider {
+            margin: 15px 0;
+            color: var(--phosphor-secondary);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-overlay scanlines"></div>
+    <div class="crt-overlay flicker"></div>
+    <div class="screen-curve"></div>
+
+    <div class="terminal" id="terminal">
+        <div id="output"></div>
+        <div class="input-line">
+            <span class="prompt">visitor@eduardo:~$</span>
+            <input type="text" id="command-input" autofocus autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const output = document.getElementById('output');
+        const input = document.getElementById('command-input');
+
+        const commands = {
+            help: {
+                desc: 'Show available commands',
+                action: () => {
+                    const helpText = [
+                        '',
+                        '<div class="ascii-art glow-effect">╔══════════════════════════════════════════╗</div>',
+                        '<div class="ascii-art glow-effect">║     AVAILABLE COMMANDS                  ║</div>',
+                        '<div class="ascii-art glow-effect">╚══════════════════════════════════════════╝</div>',
+                        '',
+                        '<div class="help-item"><span class="help-command">about</span>     <span class="help-desc">- Learn about me</span></div>',
+                        '<div class="help-item"><span class="help-command">skills</span>    <span class="help-desc">- View my technical skills</span></div>',
+                        '<div class="help-item"><span class="help-command">experience</span> <span class="help-desc">- View work experience</span></div>',
+                        '<div class="help-item"><span class="help-command">education</span> <span class="help-desc">- View education background</span></div>',
+                        '<div class="help-item"><span class="help-command">certifications</span> <span class="help-desc">- View certifications</span></div>',
+                        '<div class="help-item"><span class="help-command">languages</span> <span class="help-desc">- View spoken languages</span></div>',
+                        '<div class="help-item"><span class="help-command">interests</span> <span class="help-desc">- View my interests</span></div>',
+                        '<div class="help-item"><span class="help-command">recommendations</span> <span class="help-desc">- View recommendations</span></div>',
+                        '<div class="help-item"><span class="help-command">contact</span>   <span class="help-desc">- Get in touch with me</span></div>',
+                        '<div class="help-item"><span class="help-command">social</span>    <span class="help-desc">- View social media links</span></div>',
+                        '<div class="help-item"><span class="help-command">clear</span>     <span class="help-desc">- Clear the terminal screen</span></div>',
+                        '<div class="help-item"><span class="help-command">matrix</span>    <span class="help-desc">- Enter the matrix</span></div>',
+                        '<div class="help-item"><span class="help-command">date</span>      <span class="help-desc">- Display current date and time</span></div>',
+                        '<div class="help-item"><span class="help-command">fortune</span>   <span class="help-desc">- Get a random fortune</span></div>',
+                        '<div class="help-item"><span class="help-command">whoami</span>    <span class="help-desc">- Who am I?</span></div>',
+                        '<div class="help-item"><span class="help-command">ls</span>        <span class="help-desc">- List directory contents</span></div>',
+                        '<div class="help-item"><span class="help-command">pwd</span>       <span class="help-desc">- Print working directory</span></div>',
+                        '<div class="help-item"><span class="help-command">neofetch</span>  <span class="help-desc">- System information</span></div>',
+                        '',
+                    ];
+                    return helpText.join('\n');
+                }
+            },
+
+            about: {
+                desc: 'Learn about me',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ___    _   _  ____   _   _   _____  ____   _____
+ / _ \\  | \\ | ||  _ \\ | | | | | ____||  _ \\ |_   _|
+| |_) | |  \\| || |_) || | | | |  _|  | |_) |  | |
+|  __/  | |\\  ||  __/ | |_| | | |___ |  _ <   | |
+|_|     |_| \\_||_|     \\___/  |_____||_| \\_\\  |_|
+</div>
+
+<div class="output-line response">
+Hello! I'm Eduardo França, a Systems Engineer with over a decade of experience<br>
+building software across web, cloud, and infrastructure domains.<br><br>
+
+Currently at <span class="output-line success">Encora Inc.</span>, I develop and maintain Python-based software<br>
+for managing StarlingX, Kubernetes, and OpenStack solutions, optimizing<br>
+cloud-native infrastructure at the edge for telecom, automotive, and manufacturing.<br><br>
+
+Previously, I spent time at <span class="output-line success">IBM</span> building internal tools with Python,<br>
+Javascript, and Postgres on IBM Cloud, and at <span class="output-line success">UFES</span> where I built<br>
+full-stack applications for distance learning using Laravel, Node.js, and React.<br><br>
+
+My main interests are <span class="output-line success">Computer Science</span>, the <span class="output-line success">History of Computing</span>,<br>
+and <span class="output-line success">Language Learning</span>. I'm also very curious about <span class="output-line success">Formal Proof systems</span>.<br><br>
+
+I've been teaching English in the past, and I still find joy in bridging<br>
+communication gaps between technology and people.<br><br>
+
+<span class="output-line success">═══════════════════════════════════════════</span>
+<span class="output-line success">  Location: Serra, Espirito Santo, Brazil</span>
+<span class="output-line success">  Status: Open to interesting conversations</span>
+<span class="output-line success">═══════════════════════════════════════════</span>
+</div>`;
+                }
+            },
+
+            skills: {
+                desc: 'View my technical skills',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  _____   _____   _____   _____   _____   _____
+ |  _ \\ / _ \\ \\ / / _ \\ |  __ \\ / _ \\ \\ / / _ \\
+ | |_) | | | \\ V / | | | |  | | | | \\ V / | | |
+ |  _ <| |_| |||||_| | | |  | | |_| |||||_| |
+ |_| \\_\\\\___/ |_| \\___/ |_|  |_|\\___/ |_| \\___/
+</div>
+
+<div class="output-line response">
+<span class="output-line success">▸ Primary Languages:</span>
+  - Python (StarlingX, Kubernetes, OpenStack, cloud-native tooling)
+  - JavaScript / TypeScript (Node.js, React, frontend tooling)
+  - PHP (Laravel, legacy web applications)
+  - C# (Microsoft .NET, government systems)<br><br>
+
+<span class="output-line success">▸ Databases:</span>
+  - PostgreSQL, MySQL, SQL Server
+  - Database design and optimization<br><br>
+
+<span class="output-line success">▸ Frameworks & Tools:</span>
+  - Node.js, Express, React, Bootstrap
+  - Laravel, PowerShell, Docker, Kubernetes
+  - IBM Cloud products, third-party API integration<br><br>
+
+<span class="output-line success">▸ Core Competencies:</span>
+  - Full-stack web development
+  - Cloud-native infrastructure at the edge
+  - Internal tools and CLI utilities
+  - REST API design and implementation
+  - Frontend & backend development
+  - Infrastructure maintenance and IT consulting
+</div>`;
+                }
+            },
+
+            experience: {
+                desc: 'View work experience',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║         WORK EXPERIENCE                      ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">[Dec 2024 - Present]</span>
+<span class="help-command">Systems Engineer</span> @ Encora Inc.
+- Develop and maintain Python-based software for managing StarlingX,<br>
+  Kubernetes and OpenStack solutions, optimizing cloud-native infrastructure<br>
+  at the edge, with a focus on industries such as telecom, automotive,<br>
+  and manufacturing.<br><br>
+
+<span class="output-line success">[Apr 2022 - Dec 2024]</span>
+<span class="help-command">Application Developer</span> @ IBM
+- Application Development, Frontend, Backend, CLI tools
+- Development for Internal tools (Web Applications, and CLI utilities),<br>
+  built on IBM Cloud products, with Python, Javascript, Postgres,<br>
+  PowerShell, and third party APIs.<br><br>
+
+<span class="output-line success">[Jul 2016 - Apr 2022]</span>
+<span class="help-command">Web Developer</span> @ Federal University of Espirito Santo (UFES)
+- Built the Acervo library, displaying books and resources for distance<br>
+  learning students. PHP with Laravel, Javascript, Bootstrap, MySQL.
+- Backend for Sistema de Seleicao: Rest API built with Node, Express,<br>
+  and MySQL, with a React frontend.<br><br>
+
+<span class="output-line success">[Aug 2015 - Jul 2016]</span>
+<span class="help-command">Bolsista (Scholarship Student) - CAPES</span> @ UFES
+- Research and Development at LIEd (Laboratory for Information Technology<br>
+  in Education). Research, propose, design and develop technologies to<br>
+  support students and educators in school settings.<br><br>
+
+<span class="output-line success">[Jun 2010 - Feb 2012]</span>
+<span class="help-command">Technology Analyst - Development</span> @ Espirito Santo State Government
+- Customize and maintain web pages for the government of Espirito Santo.
+- Development of web applications in Microsoft .NET technology.<br><br>
+
+<span class="output-line success">[Jul 2008 - Jan 2009]</span>
+<span class="help-command">Software Engineer</span> @ Objetiva Solucoes
+- Plan, Implement and Maintain components of Objetiva's commercial<br>
+  automation system.
+</div>`;
+                }
+            },
+
+            education: {
+                desc: 'View education background',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║           EDUCATION                          ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">[2014 - 2017]</span>
+<span class="help-command">Master of Computer Science (MSc)</span>
+Universidade Federal do Espirito Santo (UFES)
+- Computer Science<br><br>
+
+<span class="output-line success">[2005 - 2009]</span>
+<span class="help-command">Bachelor of Computer Information Systems</span>
+Faculdade Pitagoras
+- COMPUTER AND INFORMATION SCIENCES AND SUPPORT SERVICES
+</div>`;
+                }
+            },
+
+            certifications: {
+                desc: 'View certifications',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║         CERTIFICATIONS                      ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">[Oct 2021]</span>
+<span class="help-command">Dive into Refactoring</span>
+Refactoring.Guru<br><br>
+
+<span class="output-line success">[Aug 2021]</span>
+<span class="help-command">API Test Automation with Postman</span>
+TestAutomationU<br><br>
+
+<span class="output-line success">[Mar 2020]</span>
+<span class="help-command">Product School Certificate</span>
+Product School<br><br>
+
+<span class="output-line success">[Feb 2018]</span>
+<span class="help-command">Learn React Course</span>
+Codecademy
+</div>`;
+                }
+            },
+
+            languages: {
+                desc: 'View spoken languages',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║           LANGUAGES                          ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">Portuguese</span>  - Native or bilingual proficiency
+<span class="output-line success">English</span>     - Native or bilingual proficiency
+<span class="output-line success">Spanish</span>     - Limited working proficiency
+<span class="output-line success">German</span>      - Limited working proficiency
+</div>`;
+                }
+            },
+
+            interests: {
+                desc: 'View my interests',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║           INTERESTS                          ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="output-line success">▸ Computer Science</span>
+  Deep fascination with algorithms, computation theory, and the<br>
+  foundations of how computers work.<br><br>
+
+<span class="output-line success">▸ History of Computing</span>
+  Exploring how computing evolved from early machines to modern<br>
+  cloud infrastructure and beyond.<br><br>
+
+<span class="output-line success">▸ Language Learning</span>
+  Passionate about learning new languages and understanding<br>
+  how they shape thought and culture.<br><br>
+
+<span class="output-line success">▸ Formal Proof Systems</span>
+  Very curious about mathematical logic, theorem proving, and<br>
+  the rigor of formal verification.
+</div>`;
+                }
+            },
+
+            recommendations: {
+                desc: 'View recommendations',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║       RECOMMENDATIONS                       ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<span class="help-command">Peter Safwat</span>
+<span class="help-desc">"I had the pleasure of working with Eduardo for nearly three years and<br>
+witnessed nothing but dedication and commitment. He is incredibly helpful,<br>
+resourceful, and highly skilled in his field. Eduardo consistently went above<br>
+and beyond to assist others, even when he didn't have the immediate answer,<br>
+he would make the effort to find it. Working with him was truly a rewarding<br>
+experience."</span><br><br>
+
+<span class="help-command">Renato DelPupo</span>
+<span class="help-desc">"Eduardo is restless."</span>
+</div>`;
+                }
+            },
+
+            contact: {
+                desc: 'Get in touch with me',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║          GET IN TOUCH                         ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+Feel free to reach out! I'm always open to new opportunities<br>
+and interesting conversations.<br><br>
+
+<span class="output-line success">📧 Email:</span>  eduardo@example.com<br>
+<span class="output-line success">💼 LinkedIn:</span>  linkedin.com/in/eduardofranca<br>
+<span class="output-line success">🐙 GitHub:</span>    github.com/edo9k<br>
+<span class="output-line success">🐘 Mastodon:</span>  @edo9k@mastodon.sdf.org<br><br>
+
+<span class="help-desc">I'm based in Serra, Espirito Santo, Brazil.</span>
+</div>`;
+                }
+            },
+
+            social: {
+                desc: 'View social media links',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════╗
+  ║          CONNECT WITH ME                     ║
+  ╚══════════════════════════════════════════════╝
+</div>
+
+<div class="output-line response">
+<div class="link-item">
+  <span class="output-line success">[GitHub]</span>    <a href="https://github.com/edo9k" target="_blank">https://github.com/edo9k</a>
+</div>
+<div class="link-item">
+  <span class="output-line success">[LinkedIn]</span>  <a href="https://linkedin.com/in/eduardofranca" target="_blank">https://linkedin.com/in/eduardofranca</a>
+</div>
+<div class="link-item">
+  <span class="output-line success">[Mastodon]</span>  <a href="https://mastodon.sdf.org/@edo9k" target="_blank">@edo9k@mastodon.sdf.org</a>
+</div>
+</div>`;
+                }
+            },
+
+            clear: {
+                desc: 'Clear the terminal screen',
+                action: () => {
+                    output.innerHTML = '';
+                    return null;
+                }
+            },
+
+            matrix: {
+                desc: 'Enter the matrix',
+                action: () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.id = 'matrix-canvas';
+                    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;background:#000;';
+                    document.body.appendChild(canvas);
+
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+
+                    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+                    const fontSize = 14;
+                    const columns = canvas.width / fontSize;
+                    const drops = Array(Math.floor(columns)).fill(1);
+
+                    function drawMatrix() {
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                        ctx.fillStyle = '#0F0';
+                        ctx.font = fontSize + 'px monospace';
+
+                        for (let i = 0; i < drops.length; i++) {
+                            const text = chars[Math.floor(Math.random() * chars.length)];
+                            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                                drops[i] = 0;
+                            }
+                            drops[i]++;
+                        }
+                    }
+
+                    const matrixInterval = setInterval(drawMatrix, 33);
+
+                    setTimeout(() => {
+                        clearInterval(matrixInterval);
+                        canvas.remove();
+                        return '<div class="output-line success">You took the red pill. Welcome back.</div>';
+                    }, 5000);
+
+                    return '<div class="output-line success">Entering the Matrix... Press ESC to exit</div>';
+                }
+            },
+
+            date: {
+                desc: 'Display current date and time',
+                action: () => {
+                    return `<div class="output-line response">${new Date().toString()}</div>`;
+                }
+            },
+
+            fortune: {
+                desc: 'Get a random fortune',
+                action: () => {
+                    const fortunes = [
+                        'The best way to predict the future is to create it.',
+                        'Code is like humor. When you have to explain it, it\'s bad.',
+                        'First, solve the problem. Then, write the code.',
+                        'Simplicity is the soul of efficiency.',
+                        'Experience is the name everyone gives to their mistakes.',
+                        'The only way to do great work is to love what you do.',
+                        'Stay hungry, stay foolish.',
+                        'Talk is cheap. Show me the code.',
+                        'Programs must be written for people to read.',
+                        'Any fool can write code that a computer can understand.'
+                    ];
+                    const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+                    return `<div class="output-line success">━━━ Fortune ━━━${' '.repeat(20)}\n  "${fortune}"\n━━━━━━━━━━━━━━━━━━━━━━━━</div>`;
+                }
+            },
+
+            whoami: {
+                desc: 'Who am I?',
+                action: () => {
+                    return `<div class="output-line response">visitor@eduardo:~$ whoami\nYou are a curious visitor exploring Eduardo's terminal portfolio. Welcome!</div>`;
+                }
+            },
+
+            ls: {
+                desc: 'List directory contents',
+                action: () => {
+                    return `<div class="output-line response">about/  skills/  experience/  education/  certifications/  languages/  interests/  recommendations/  contact/  social/  README.md</div>`;
+                }
+            },
+
+            pwd: {
+                desc: 'Print working directory',
+                action: () => {
+                    return `<div class="output-line response">/home/visitor/eduardo-portfolio</div>`;
+                }
+            },
+
+            neofetch: {
+                desc: 'System information',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+        .--.        visitor@eduardo
+       |o_o |       ---------------
+       |:_/ |       OS: Portfolio OS v2.0
+      //   \\ \\      Host: Web Browser
+     (|     | )     Kernel: JavaScript ES6+
+    /'\\_   _/\`\\     Uptime: Since 2024
+    \\___)=(___/     Shell: Web Terminal
+                    Resolution: ${window.innerWidth}x${window.innerHeight}
+                    Theme: Phosphor Green
+                    User: Eduardo Franca
+                    Location: Serra, ES, Brazil
+</div>`;
+                }
+            },
+
+            banner: {
+                desc: 'Display welcome banner',
+                action: () => {
+                    return `
+<div class="ascii-art glow-effect">
+  ╔══════════════════════════════════════════════════════╗
+  ║                                                      ║
+  ║   ██████╗ ██╗   ██╗████████╗██████╗  ██████╗        ║
+  ║  ██╔═══██╗██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗       ║
+  ║  ██║   ██║██║   ██║   ██║   ██████╔╝██║   ██║       ║
+  ║  ██║   ██║██║   ██║   ██║   ██╔══██╗██║   ██║       ║
+  ║  ╚██████╔╝╚██████╔╝   ██║   ██║  ██║╚██████╔╝       ║
+  ║   ╚═════╝  ╚═════╝    ╚═╝   ╚═╝  ╚═╝ ╚═════╝        ║
+  ║                                                      ║
+  ║         WELCOME TO EDUARDO'S PORTFOLIO              ║
+  ║                                                      ║
+  ║   Systems Engineer | Encora Inc.                     ║
+  ║   Serra, Espirito Santo, Brazil                      ║
+  ║                                                      ║
+  ║   Type 'help' to see available commands               ║
+  ║                                                      ║
+  ╚══════════════════════════════════════════════════════╝
+</div>`;
+                }
+            }
+        };
+
+        function addOutput(text, className = 'response') {
+            if (text === null) return;
+
+            const line = document.createElement('div');
+            line.className = `output-line ${className}`;
+            line.innerHTML = text;
+            output.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function executeCommand(cmd) {
+            const trimmedCmd = cmd.trim().toLowerCase();
+            const [command, ...args] = trimmedCmd.split(' ');
+
+            addOutput(`<span class="command">visitor@eduardo:~$ ${cmd}</span>`, 'command');
+
+            if (command === '') return;
+
+            if (commands[command]) {
+                const result = commands[command].action();
+                if (result !== null) {
+                    addOutput(result);
+                }
+            } else {
+                addOutput(`<span class="error">Command not found: ${command}. Type 'help' for available commands.</span>`, 'error');
+            }
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                executeCommand(input.value);
+                input.value = '';
+            }
+        });
+
+        terminal.addEventListener('click', () => {
+            input.focus();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('matrix-canvas')?.remove();
+            }
+        });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                addOutput(commands.banner.action());
+                addOutput(`<div class="output-line response">Welcome! I'm loading Eduardo's experience...<br>Type 'help' to get started.</div>`);
+                input.focus();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
