@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Motion Guard</string>
+    <string name="default_notification_channel_id">motionguard_monitoring</string>
+    <string name="notification_channel_name">Motion Guard Monitoring</string>
+    <string name="default_notification_channel_id_value">motionguard_monitoring</string>
+
+    <string name="google_drive">Google Drive</string>
+    <string name="one_drive">Microsoft OneDrive</string>
+    <string name="dropbox">Dropbox</string>
+    <string name="mega">MEGA</string>
+
+</resources>

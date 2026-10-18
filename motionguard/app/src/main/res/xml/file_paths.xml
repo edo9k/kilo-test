@@ -1,0 +1,5 @@
+<paths>
+    <external-path name="motionguard_videos" path="MotionGuard/Videos/" />
+    <external-path name="motionguard_cache" path="MotionGuard/Cache/" />
+    <external-files-path name="motionguard_files" path="MotionGuard/" />
+</paths>
