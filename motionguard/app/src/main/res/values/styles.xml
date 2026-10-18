@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MotionGuard" parent="Theme.Material3.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/motion_primary</item>
+        <item name="colorPrimaryDark">@color/motion_primary_dark</item>
+        <item name="colorAccent">@color/motion_accent</item>
+        <item name="android:statusBarColor">@color/motion_primary_dark</item>
+        <item name="android:navigationBarColor">@color/black_FF000000</item>
+    </style>
+
+    <style name="Theme.MotionGuard.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/motion_primary</item>
+        <item name="colorPrimaryDark">@color/motion_primary_dark</item>
+        <item name="colorAccent">@color/motion_accent</item>
+        <item name="android:statusBarColor">@color/motion_primary_dark</item>
+        <item name="android:navigationBarColor">@color/black_FF000000</item>
+    </style>
+
+</resources>

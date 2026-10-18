@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/holo_gray_light"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Motion Detection Settings"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sensitivity"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etSensitivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="0.05"
+        android:inputType="numberDecimal" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Max Recording Duration (sec)"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etMaxDuration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="30"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cooldown Period (sec)"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etCooldown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="2"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pre-motion Buffer (sec)"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etPreBuffer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="3"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Resolution"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/spinnerResolution"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:color/darker_gray" />
+
+    <Switch
+        android:id="@+id/swRecordAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Record Audio"
+        android:layout_marginBottom="8dp" />
+
+    <Switch
+        android:id="@+id/swContinuousMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Continuous Monitoring Mode"
+        android:layout_marginBottom="8dp" />
+
+    <Switch
+        android:id="@+id/swAutoDelete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Auto-delete after upload"
+        android:layout_marginBottom="8dp" />
+
+    <Switch
+        android:id="@+id/swUploadOnWiFi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload on WiFi only" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:color/darker_gray" />
+
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="Back" />
+
+    <Button
+        android:id="@+id/btnReset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reset to Defaults" />
+
+</LinearLayout>
