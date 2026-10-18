@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Word Bank Check</title>
+</head>
+<body>
+    <h1>Word Bank Validation</h1>
+    <div id="out"></div>
+    <script src="../data/words.js"></script>
+    <script>
+        let ok = true;
+        let html = '<ul>';
+        for (let len=3; len<=10; len++) {
+            const cnt = WORD_BUCKETS[len] ? WORD_BUCKETS[len].length : 0;
+            html += `<li>Length ${len}: ${cnt} words ${cnt>=30?'✓':'✗'}</li>`;
+            if (cnt < 30) ok=false;
+        }
+        html += `</ul><p>${ok?'All OK':'Some buckets low'}</p>`;
+        document.getElementById('out').innerHTML = html;
+    </script>
+</body>
+</html>
