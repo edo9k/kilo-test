@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  auto-cut-ads:
+    build: .
+    image: auto-cut-ads:latest
+    volumes:
+      - .:/data
+    working_dir: /data
+    entrypoint: ["auto-cut-ads"]

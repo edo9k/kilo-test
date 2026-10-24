@@ -1,0 +1,20 @@
+{
+  "name": "auto-cut-ads",
+  "version": "1.0.0",
+  "description": "CLI tool to remove ads from audio/video files",
+  "main": "src/index.js",
+  "bin": {
+    "auto-cut-ads": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^2.6.7"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
