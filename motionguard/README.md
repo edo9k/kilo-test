@@ -34,7 +34,10 @@ motionguard/
 │   └── proguard-rules.pro
 ├── build.gradle
 ├── settings.gradle
-└── gradle.properties
+├── gradle.properties
+├── build.sh
+├── README.md
+└── gradle/
 ```
 
 ## How It Works
