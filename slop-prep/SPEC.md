@@ -123,3 +123,8 @@ claude-foundation::qid::Q001 tier::mcq topic::hallucination	[STYLE]<div class="c
 claude-foundation::qid::Q001 tier::concept topic::hallucination	[STYLE]<div class="cf-wrap"><div class="cf-tag">Concept</div><p class="cf-q">Concept: To prevent fabricated facts, enforce {{c1::explicit citation requirements}}.</p><details><summary>Full original question</summary><div class="cf-full">A support agent using the API receives a response that is fluent and confident but cites statistics that do not exist in any provided document.<br>Which mitigation most directly reduces this behavior?<br>A) Lower the temperature to 0<br>B) Require the model to cite source documents for factual claims<br>C) Switch to a larger model<br>D) Shorten the system prompt</div></details><details><summary>Answer &amp; rationale</summary><div class="cf-full"><b>Correct:</b> B) Require the model to cite source documents for factual claims<br><b>Why:</b> Grounding claims in retrievable sources lets the system detect unsupported statements; temperature and model size do not remove fabrication.</div></details></div>
 EOF
 echo done
+PROCESS (reuse)
+- Input source: ccao-f/practice-questions.md from preporato/claude-certification-guide (or any raw question set).
+- Exclude questions with multiple correct answers (spec requires exactly one).
+- Output: slop-prep/deck.tsv (UTF-8 TSV, header Tags<TAB>Text).
+- Validate: 2 rows per valid QID, one {{c1::}}, no literal tabs/newlines in Text, starts with <style> (inline mode).
