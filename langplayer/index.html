@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>LangPlayer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="shell">
+    <div class="header-inner">
+      <div class="brand">LangPlayer</div>
+      <button class="icon-btn" id="settingsBtn" aria-label="Settings">&#9881;</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <aside class="panel panel-settings" id="settingsPanel">
+      <button class="close-btn" id="closeSettings" aria-label="Close settings">&times;</button>
+      <h2>Settings</h2>
+      <div class="setting-row">
+        <label>Auto-skip after <span id="skipVal">3</span> minutes</label>
+        <input type="range" id="skipRange" min="1" max="30" step="1" value="3" />
+      </div>
+      <div class="setting-row">
+        <label>Enabled languages</label>
+        <div class="lang-toggles" id="langToggles"></div>
+      </div>
+      <div class="setting-row">
+        <label class="chip" id="resetBtn">Reset defaults</label>
+      </div>
+    </aside>
+
+    <div class="player-wrap">
+      <div class="player">
+        <div class="status" id="status">Ready</div>
+        <div class="now-playing">
+          <div class="np-art" id="npArt">&#127928;</div>
+          <div class="np-info">
+            <div class="np-lang" id="npLang">—</div>
+            <div class="np-title" id="npTitle">Select a language to begin</div>
+            <div class="np-source" id="npSource">—</div>
+          </div>
+        </div>
+
+        <audio id="audio" preload="metadata"></audio>
+
+        <div class="controls">
+          <button class="ctrl-btn" id="btnPrev" aria-label="Previous">&#9664;&#9664;</button>
+          <button class="ctrl-btn primary" id="btnPlay" aria-label="Play/Pause">&#9658;</button>
+          <button class="ctrl-btn" id="btnNext" aria-label="Next">&#9654;&#9654;</button>
+          <button class="ctrl-btn" id="btnBack" aria-label="Jump back 10s">&#9194; -10s</button>
+          <button class="ctrl-btn" id="btnFwd" aria-label="Jump forward 10s">+10s &#9193;</button>
+        </div>
+
+        <div class="progress-wrap">
+          <input type="range" id="progress" min="0" max="100" value="0" />
+          <div class="progress-time">
+            <span id="curTime">0:00</span>
+            <span id="durTime">0:00</span>
+          </div>
+        </div>
+
+        <div class="skip-info" id="skipInfo">Auto-skip: off</div>
+
+        <div class="episodes" id="episodes">
+          <h3>Episodes</h3>
+          <div class="episode-list" id="episodeList">Loading…</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
