@@ -1,6 +1,9 @@
 const STORAGE_KEY = "langplayer:v1";
 const DEFAULT_SKIP_MINUTES = 3;
 const JUMP_SECONDS = 10;
+// Set this to your running CORS proxy, e.g. "http://localhost:3456/proxy?url="
+// Leave empty to attempt direct fetch (only works for CORS-enabled feeds).
+const PROXY_URL = "";
 
 const LANG_ORDER = [
   { code: "en", name: "English" },
@@ -171,16 +174,26 @@ function currentFeed() {
 }
 
 function proxyUrl(url) {
-  return "https://corsproxy.io/?url=" + encodeURIComponent(url);
+  if (!PROXY_URL) return url;
+  return PROXY_URL + encodeURIComponent(url);
+}
+
+function corsHint(err) {
+  const m = (err && err.message) || "";
+  if (m.includes("401") || m.includes("403") || m.includes("CORS") || m.includes("Failed to fetch")) {
+    return "Cross-origin RSS blocked by browser (CORS). Run proxy.js and set PROXY_URL in app.js, or use a CORS-enabled feed.";
+  }
+  return "";
 }
 
 async function fetchRSS(url) {
   let lastErr;
-  const attempts = [url, proxyUrl(url)];
+  const attempts = [url];
+  if (PROXY_URL) attempts.push(proxyUrl(url));
   for (const u of attempts) {
     try {
       const res = await fetch(u, { headers: { Accept: "application/xml, text/xml, */*" } });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      if (!res.ok) throw new Error("HTTP " + res.status + " " + corsHint({ message: "HTTP " + res.status }));
       const text = await res.text();
       if (!text.trim()) throw new Error("Empty response");
       return text;
@@ -364,7 +377,7 @@ async function loadCurrent() {
     renderEpisodes(episodes);
     playEpisode(state.episodeIndex);
   } catch (e) {
-    logStatus("Failed to load feed: " + escapeHtml(e.message));
+    logStatus("Failed to load feed: " + escapeHtml(e.message) + " " + escapeHtml(corsHint(e)));
     renderEpisodes([]);
   }
 }
