@@ -1,0 +1,50 @@
+{
+  "en": [
+    { "name": "NPR News Now", "url": "https://feeds.npr.org/1001/rss.xml" },
+    { "name": "BBC Global News", "url": "https://feeds.bbci.co.uk/news/world/rss.xml" },
+    { "name": "AP News", "url": "https://feeds.apnews.com/rss/apf-topnews" }
+  ],
+  "zh": [
+    { "name": "BBC Chinese", "url": "http://feeds.bbci.co.uk/chinese/rss.xml" },
+    { "name": "CGTN", "url": "https://twitter.com/cgtnofficial/rss" }
+  ],
+  "hi": [
+    { "name": "BBC Hindi", "url": "http://feeds.bbci.co.uk/hindi/rss.xml" }
+  ],
+  "es": [
+    { "name": "BBC Mundo", "url": "http://feeds.bbci.co.uk/mundo/rss.xml" },
+    { "name": "CNN en Espanol", "url": "https://rss.cnn.com/rss/cnn_espanol.rss" }
+  ],
+  "fr": [
+    { "name": "BBC French", "url": "http://feeds.bbci.co.uk/french/rss.xml" },
+    { "name": "RFI French", "url": "https://www.rfi.fr/fr/rss" }
+  ],
+  "ar": [
+    { "name": "BBC Arabic", "url": "http://feeds.bbci.co.uk/arabic/rss.xml" }
+  ],
+  "bn": [
+    { "name": "BBC Bengali", "url": "http://feeds.bbci.co.uk/bengali/rss.xml" }
+  ],
+  "pt": [
+    { "name": "BBC Portuguese", "url": "http://feeds.bbci.co.uk/portuguese/rss.xml" }
+  ],
+  "ru": [
+    { "name": "BBC Russian", "url": "http://feeds.bbci.co.uk/russian/rss.xml" }
+  ],
+  "ur": [
+    { "name": "BBC Urdu", "url": "http://feeds.bbci.co.uk/urdu/rss.xml" }
+  ],
+  "id": [
+    { "name": "BBC Indonesian", "url": "http://feeds.bbci.co.uk/indonesian/rss.xml" }
+  ],
+  "ko": [
+    { "name": "Yonhap News", "url": "https://www.yna.co.kr/rss/news.xml" },
+    { "name": "Yonhap Politics", "url": "https://www.yna.co.kr/rss/politics.xml" },
+    { "name": "Yonhap Economy", "url": "https://www.yna.co.kr/rss/economy.xml" }
+  ],
+  "it": [
+    { "name": "ANSA Notizie", "url": "https://www.ansa.it/sito/ansait_rss.xml" },
+    { "name": "ANSA Ultima Ora", "url": "https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml" },
+    { "name": "ANSA Europa", "url": "https://www.ansa.it/europa/notizie/rss.xml" }
+  ]
+}

@@ -1,6 +1,7 @@
 const STORAGE_KEY = "langplayer:v1";
 const DEFAULT_SKIP_MINUTES = 3;
 const JUMP_SECONDS = 10;
+const MANIFEST_URL = "data/episodes.json";
 
 const LANG_ORDER = [
   { code: "en", name: "English" },
@@ -17,57 +18,6 @@ const LANG_ORDER = [
   { code: "id", name: "Bahasa Indonesia (Indonesian)" },
   { code: "it", name: "Italiano (Italian)" },
 ];
-
-const FEEDS = {
-  en: [
-    { name: "NPR News Now", url: "https://feeds.npr.org/1001/rss.xml" },
-    { name: "BBC Global News", url: "https://feeds.bbci.co.uk/news/world/rss.xml" },
-    { name: "AP News", url: "https://feeds.apnews.com/rss/apf-topnews" },
-  ],
-  zh: [
-    { name: "BBC Chinese", url: "http://feeds.bbci.co.uk/chinese/rss.xml" },
-    { name: "CGTN", url: "https://twitter.com/cgtnofficial/rss" },
-  ],
-  hi: [
-    { name: "BBC Hindi", url: "http://feeds.bbci.co.uk/hindi/rss.xml" },
-  ],
-  es: [
-    { name: "BBC Mundo", url: "http://feeds.bbci.co.uk/mundo/rss.xml" },
-    { name: "CNN en Español", url: "https://rss.cnn.com/rss/cnn_espanol.rss" },
-  ],
-  fr: [
-    { name: "BBC French", url: "http://feeds.bbci.co.uk/french/rss.xml" },
-    { name: "RFI French", url: "https://www.rfi.fr/fr/rss" },
-  ],
-  ar: [
-    { name: "BBC Arabic", url: "http://feeds.bbci.co.uk/arabic/rss.xml" },
-  ],
-  bn: [
-    { name: "BBC Bengali", url: "http://feeds.bbci.co.uk/bengali/rss.xml" },
-  ],
-  pt: [
-    { name: "BBC Portuguese", url: "http://feeds.bbci.co.uk/portuguese/rss.xml" },
-  ],
-  ru: [
-    { name: "BBC Russian", url: "http://feeds.bbci.co.uk/russian/rss.xml" },
-  ],
-  ur: [
-    { name: "BBC Urdu", url: "http://feeds.bbci.co.uk/urdu/rss.xml" },
-  ],
-  id: [
-    { name: "BBC Indonesian", url: "http://feeds.bbci.co.uk/indonesian/rss.xml" },
-  ],
-  ko: [
-    { name: "Yonhap News", url: "https://www.yna.co.kr/rss/news.xml" },
-    { name: "Yonhap Politics", url: "https://www.yna.co.kr/rss/politics.xml" },
-    { name: "Yonhap Economy", url: "https://www.yna.co.kr/rss/economy.xml" },
-  ],
-  it: [
-    { name: "ANSA Notizie", url: "https://www.ansa.it/sito/ansait_rss.xml" },
-    { name: "ANSA Ultima Ora", url: "https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml" },
-    { name: "ANSA Europa", url: "https://www.ansa.it/europa/notizie/rss.xml" },
-  ],
-};
 
 const audio = document.getElementById("audio");
 const statusEl = document.getElementById("status");
@@ -96,7 +46,7 @@ let state = {
 };
 
 let ring = [];
-let episodes = [];
+let manifest = {};
 let skipTimer = null;
 let metadataTimer = null;
 let initialized = false;
@@ -126,7 +76,6 @@ function loadDefaults() {
   } else {
     resetState();
   }
-  // Default all enabled
   LANG_ORDER.forEach((l) => {
     if (state.enabled[l.code] === undefined) state.enabled[l.code] = true;
   });
@@ -142,13 +91,16 @@ function resetState() {
 }
 
 function buildRing() {
-  ring = LANG_ORDER.filter((l) => state.enabled[l.code]);
+  ring = LANG_ORDER.filter(
+    (l) => state.enabled[l.code] && manifest[l.code] && manifest[l.code].length > 0
+  );
   if (ring.length === 0) {
-    LANG_ORDER.forEach((l) => (state.enabled[l.code] = true));
-    ring = [...LANG_ORDER];
-    save();
+    ring = LANG_ORDER.filter((l) => manifest[l.code] && manifest[l.code].length > 0);
+    if (ring.length === 0) {
+      ring = [...LANG_ORDER];
+      LANG_ORDER.forEach((l) => (state.enabled[l.code] = true));
+    }
   }
-  // Clamp indices
   if (state.langIndex >= ring.length) state.langIndex = 0;
   save();
 }
@@ -164,57 +116,70 @@ function currentLang() {
   return ring[state.langIndex];
 }
 
-function currentFeed() {
-  const lang = currentLang();
-  const feeds = FEEDS[lang.code] || [];
-  return feeds.length ? feeds[0] : null;
+function currentEpisodes() {
+  return manifest[currentLang().code] || [];
 }
 
-function proxyUrl(url) {
-  return "https://corsproxy.io/?url=" + encodeURIComponent(url);
-}
-
-async function fetchRSS(url) {
-  let lastErr;
-  const attempts = [url, proxyUrl(url)];
-  for (const u of attempts) {
-    try {
-      const res = await fetch(u, { headers: { Accept: "application/xml, text/xml, */*" } });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const text = await res.text();
-      if (!text.trim()) throw new Error("Empty response");
-      return text;
-    } catch (e) {
-      lastErr = e;
-    }
+async function loadManifest() {
+  try {
+    const res = await fetch(MANIFEST_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    manifest = await res.json();
+    if (!manifest || typeof manifest !== "object") manifest = {};
+  } catch (e) {
+    manifest = {};
+    logStatus("No episode data. Run download_episodes.py first.", true);
   }
-  throw lastErr;
 }
 
-function parseRSS(xmlText) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlText, "application/xml");
-  const parseErr = doc.querySelector("parsererror");
-  if (parseErr) throw new Error("Invalid XML");
-  const items = doc.querySelectorAll("channel > item");
-  const out = [];
-  items.forEach((item) => {
-    const enc = item.querySelector("enclosure");
-    if (!enc) return;
-    const url = enc.getAttribute("url");
-    if (!url) return;
-    const title = item.querySelector("title")?.textContent?.trim() || "Untitled";
-    const desc = item.querySelector("description")?.textContent?.trim() || "";
-    const pubDate = item.querySelector("pubDate")?.textContent?.trim() || "";
-    const guid = item.querySelector("guid")?.textContent?.trim() || url;
-    const img =
-      item.querySelector("itunes\\:image")?.getAttribute("href") ||
-      item.querySelector("itunes:image")?.getAttribute("href") ||
-      doc.querySelector("channel > itunes\\:image")?.getAttribute("href") ||
-      doc.querySelector("channel > itunes:image")?.getAttribute("href");
-    out.push({ title, desc, url, pubDate, guid, image: img });
+async function loadCurrent() {
+  const eps = currentEpisodes();
+  if (!eps.length) {
+    logStatus("No episodes for " + currentLang().name);
+    renderEpisodes([]);
+    return;
+  }
+  if (state.episodeIndex >= eps.length) state.episodeIndex = 0;
+  save();
+  renderEpisodes(eps);
+  playEpisode(state.episodeIndex);
+}
+
+function playEpisode(index) {
+  const eps = currentEpisodes();
+  if (!eps.length) return;
+  state.episodeIndex = index;
+  save();
+  const ep = eps[index];
+  npLangEl.textContent = currentLang().name;
+  npTitleEl.textContent = escapeHtml(ep.title);
+  npSourceEl.textContent = ep.source;
+  document.getElementById("npArt").textContent = "&#127928;";
+  audio.src = ep.audio;
+  audio.play().catch((e) => {
+    logStatus("Playback blocked: " + escapeHtml(e.message));
   });
-  return out;
+  renderEpisodes(eps);
+  startSkipTimer();
+  startProgressLoop();
+  logStatus("Playing", false);
+}
+
+function togglePlay() {
+  if (audio.paused) {
+    audio.play().catch(() => {});
+  } else {
+    audio.pause();
+  }
+  renderEpisodes(currentEpisodes());
+}
+
+function advanceRing() {
+  if (ring.length === 0) return;
+  state.langIndex = (state.langIndex + 1) % ring.length;
+  state.episodeIndex = 0;
+  save();
+  loadCurrent();
 }
 
 function formatTime(s) {
@@ -304,7 +269,7 @@ function stopProgressLoop() {
 function renderEpisodes(list) {
   episodeListEl.innerHTML = "";
   if (!list || list.length === 0) {
-    episodeListEl.innerHTML = '<div class="empty">No episodes found for this language.</div>';
+    episodeListEl.innerHTML = '<div class="empty">No episodes available for this language.</div>';
     return;
   }
   list.forEach((ep, i) => {
@@ -333,84 +298,6 @@ function truncate(s, n) {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-
-function setNowPlaying(ep) {
-  npLangEl.textContent = currentLang().name;
-  npTitleEl.textContent = escapeHtml(ep.title);
-  npSourceEl.textContent = currentFeed().name;
-  document.getElementById("npArt").textContent = "&#127928;";
-}
-
-async function loadCurrent() {
-  const feed = currentFeed();
-  if (!feed) {
-    logStatus("No feed configured for " + currentLang().name);
-    renderEpisodes([]);
-    return;
-  }
-  logStatus("Loading " + currentLang().name + "…", true);
-  try {
-    const xml = await fetchRSS(feed.url);
-    episodes = parseRSS(xml);
-    if (episodes.length === 0) {
-      logStatus("No audio episodes in feed");
-      renderEpisodes([]);
-      return;
-    }
-    // Clamp episode index
-    if (state.episodeIndex >= episodes.length) state.episodeIndex = 0;
-    save();
-    renderEpisodes(episodes);
-    playEpisode(state.episodeIndex);
-  } catch (e) {
-    logStatus("Failed to load feed: " + escapeHtml(e.message));
-    renderEpisodes([]);
-  }
-}
-
-function playEpisode(index) {
-  if (!episodes.length) return;
-  state.episodeIndex = index;
-  save();
-  const ep = episodes[index];
-  setNowPlaying(ep);
-  audio.src = ep.url;
-  audio.play().catch((e) => {
-    logStatus("Playback blocked: " + escapeHtml(e.message));
-  });
-  renderEpisodes(episodes);
-  startSkipTimer();
-  startProgressLoop();
-  logStatus("Playing", false);
-}
-
-function togglePlay() {
-  if (audio.paused) {
-    audio.play().catch(() => {});
-  } else {
-    audio.pause();
-  }
-  renderEpisodes(episodes);
-}
-
-function advanceRing() {
-  if (ring.length === 0) return;
-  state.langIndex = (state.langIndex + 1) % ring.length;
-  state.episodeIndex = 0;
-  save();
-  loadCurrent();
-}
-
-function formatHMS(s) {
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = Math.floor(s % 60);
-  const parts = [];
-  if (h > 0) parts.push(h);
-  parts.push(m);
-  parts.push(String(sec).padStart(2, "0"));
-  return parts.join(":");
 }
 
 // UI wiring
@@ -442,7 +329,8 @@ resetBtn.onclick = () => {
 
 document.getElementById("btnPlay").onclick = togglePlay;
 document.getElementById("btnPrev").onclick = () => {
-  if (state.episodeIndex > 0) playEpisode(state.episodeIndex - 1);
+  const eps = currentEpisodes();
+  if (state.episodeIndex > 0 && eps.length) playEpisode(state.episodeIndex - 1);
   else advanceRing();
 };
 document.getElementById("btnNext").onclick = advanceRing;
@@ -468,18 +356,19 @@ audio.addEventListener("ended", () => {
   advanceRing();
 });
 audio.addEventListener("play", () => {
-  renderEpisodes(episodes);
+  renderEpisodes(currentEpisodes());
   startSkipTimer();
   logStatus("Playing", false);
 });
 audio.addEventListener("pause", () => {
-  renderEpisodes(episodes);
+  renderEpisodes(currentEpisodes());
   clearSkipTimer();
 });
 audio.addEventListener("error", () => {
   logStatus("Playback error. Trying next…");
-  const nextIdx = (state.episodeIndex + 1) % episodes.length;
-  if (nextIdx !== state.episodeIndex) {
+  const eps = currentEpisodes();
+  const nextIdx = (state.episodeIndex + 1) % eps.length;
+  if (eps.length && nextIdx !== state.episodeIndex) {
     playEpisode(nextIdx);
   } else {
     advanceRing();
@@ -487,10 +376,13 @@ audio.addEventListener("error", () => {
 });
 
 // Boot
-loadDefaults();
-buildRing();
-renderToggles();
-renderSkip();
-randomStart();
-loadCurrent();
-initialized = true;
+(async () => {
+  loadDefaults();
+  await loadManifest();
+  buildRing();
+  renderToggles();
+  renderSkip();
+  randomStart();
+  await loadCurrent();
+  initialized = true;
+})();

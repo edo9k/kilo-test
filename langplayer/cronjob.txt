@@ -1,0 +1,7 @@
+# LangPlayer daily download cronjob
+# Run download_episodes.py once a day (06:00 server time) to refresh the
+# per-language episode bucket and prune audio older than 4 days.
+#
+# Install with: crontab -e  (then paste the line below, adjusting paths)
+#
+# 0 6 * * * /usr/bin/python3 /absolute/path/to/langplayer/download_episodes.py >> /var/log/langplayer-download.log 2>&1
