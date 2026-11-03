@@ -13,7 +13,9 @@ const LANG_ORDER = [
   { code: "pt", name: "Português (Portuguese)" },
   { code: "ru", name: "Русский (Russian)" },
   { code: "ur", name: "اردو (Urdu)" },
+  { code: "ko", name: "한국어 (Korean)" },
   { code: "id", name: "Bahasa Indonesia (Indonesian)" },
+  { code: "it", name: "Italiano (Italian)" },
 ];
 
 const FEEDS = {
@@ -54,6 +56,16 @@ const FEEDS = {
   ],
   id: [
     { name: "BBC Indonesian", url: "http://feeds.bbci.co.uk/indonesian/rss.xml" },
+  ],
+  ko: [
+    { name: "Yonhap News", url: "https://www.yna.co.kr/rss/news.xml" },
+    { name: "Yonhap Politics", url: "https://www.yna.co.kr/rss/politics.xml" },
+    { name: "Yonhap Economy", url: "https://www.yna.co.kr/rss/economy.xml" },
+  ],
+  it: [
+    { name: "ANSA Notizie", url: "https://www.ansa.it/sito/ansait_rss.xml" },
+    { name: "ANSA Ultima Ora", url: "https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml" },
+    { name: "ANSA Europa", url: "https://www.ansa.it/europa/notizie/rss.xml" },
   ],
 };
 
