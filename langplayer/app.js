@@ -1,6 +1,7 @@
 const STORAGE_KEY = "langplayer:v1";
 const DEFAULT_SKIP_MINUTES = 3;
 const JUMP_SECONDS = 10;
+const MAX_PLAY_RETRIES = 2;
 const MANIFEST_URL = "data/episodes.json";
 
 const LANG_ORDER = [
@@ -36,6 +37,7 @@ const langTogglesEl = document.getElementById("langToggles");
 const skipRange = document.getElementById("skipRange");
 const skipValEl = document.getElementById("skipVal");
 const resetBtn = document.getElementById("resetBtn");
+const playIconEl = document.getElementById("playIcon");
 
 let state = {
   enabled: {},
@@ -50,6 +52,9 @@ let manifest = {};
 let skipTimer = null;
 let metadataTimer = null;
 let initialized = false;
+let retryAttempts = 0;
+let autoplayWanted = false;
+let lastFailedSrc = null;
 
 function logStatus(msg, loading = false) {
   statusEl.textContent = msg;
@@ -105,13 +110,6 @@ function buildRing() {
   save();
 }
 
-function randomStart() {
-  if (ring.length === 0) return;
-  state.langIndex = Math.floor(Math.random() * ring.length);
-  state.episodeIndex = 0;
-  save();
-}
-
 function currentLang() {
   return ring[state.langIndex];
 }
@@ -132,7 +130,7 @@ async function loadManifest() {
   }
 }
 
-async function loadCurrent() {
+async function loadCurrent(autoplay = true) {
   const eps = currentEpisodes();
   if (!eps.length) {
     logStatus("No episodes for " + currentLang().name);
@@ -142,32 +140,97 @@ async function loadCurrent() {
   if (state.episodeIndex >= eps.length) state.episodeIndex = 0;
   save();
   renderEpisodes(eps);
-  playEpisode(state.episodeIndex);
+  playEpisode(state.episodeIndex, autoplay);
 }
 
-function playEpisode(index) {
+function playEpisode(index, autoplay = true) {
   const eps = currentEpisodes();
   if (!eps.length) return;
+  if (index < 0 || index >= eps.length) index = 0;
   state.episodeIndex = index;
+  retryAttempts = 0;
+  autoplayWanted = autoplay;
+  lastFailedSrc = null;
   save();
   const ep = eps[index];
   npLangEl.textContent = currentLang().name;
-  npTitleEl.textContent = escapeHtml(ep.title);
+  npTitleEl.textContent = ep.title;
   npSourceEl.textContent = ep.source;
-  document.getElementById("npArt").textContent = "&#127928;";
   audio.src = ep.audio;
-  audio.play().catch((e) => {
-    logStatus("Playback blocked: " + escapeHtml(e.message));
-  });
   renderEpisodes(eps);
-  startSkipTimer();
+  updatePlayIcon();
   startProgressLoop();
-  logStatus("Playing", false);
+  if (autoplay) {
+    requestPlay();
+  } else {
+    logStatus("Ready — press play");
+  }
+}
+
+function requestPlay() {
+  if (!autoplayWanted) lastFailedSrc = null;
+  autoplayWanted = true;
+  audio.play().catch((e) => {
+    if (e.name === "NotAllowedError") {
+      autoplayWanted = false;
+      logStatus("Press play to start (the browser blocked autoplay).");
+      updatePlayIcon();
+      return;
+    }
+    if (e.name === "AbortError") return;
+    handlePlaybackFailure(e);
+  });
+}
+
+function handlePlaybackFailure(reason) {
+  const src = audio.currentSrc || audio.src;
+  if (src && src === lastFailedSrc) return;
+  lastFailedSrc = src;
+
+  if (!autoplayWanted) {
+    logStatus("Audio unavailable. Try another episode.");
+    updatePlayIcon();
+    return;
+  }
+
+  if (retryAttempts < MAX_PLAY_RETRIES) {
+    retryAttempts++;
+    logStatus("Playback failed. Retrying (" + retryAttempts + "/" + MAX_PLAY_RETRIES + ")…", true);
+    const ep = currentEpisodes()[state.episodeIndex];
+    if (!ep) {
+      skipToNext();
+      return;
+    }
+    const sep = ep.audio.indexOf("?") === -1 ? "?" : "&";
+    audio.src = ep.audio + sep + "retry=" + retryAttempts + "&t=" + Date.now();
+    requestPlay();
+    return;
+  }
+
+  retryAttempts = 0;
+  logStatus("Playback failed. Skipping to the next episode…");
+  skipToNext();
+}
+
+function skipToNext() {
+  const eps = currentEpisodes();
+  if (eps.length > 1) {
+    playEpisode((state.episodeIndex + 1) % eps.length, true);
+  } else {
+    advanceRing();
+  }
+}
+
+function updatePlayIcon() {
+  const playing = !audio.paused;
+  playIconEl.src = playing ? "icons/pause.png" : "icons/play.png";
+  playIconEl.alt = playing ? "Pause" : "Play";
+  document.getElementById("btnPlay").setAttribute("aria-label", playing ? "Pause" : "Play");
 }
 
 function togglePlay() {
   if (audio.paused) {
-    audio.play().catch(() => {});
+    requestPlay();
   } else {
     audio.pause();
   }
@@ -207,14 +270,23 @@ function renderToggles() {
 }
 
 function handleToggle(cb) {
+  const currentCode = currentLang() ? currentLang().code : null;
   state.enabled[cb.value] = cb.checked;
   buildRing();
-  renderToggles();
-  save();
-  if (ring.length > 0) {
-    randomStart();
-    loadCurrent();
+
+  const keepIndex = ring.findIndex((l) => l.code === currentCode);
+  if (keepIndex >= 0) {
+    state.langIndex = keepIndex;
+    save();
+    renderToggles();
+    return;
   }
+
+  state.langIndex = 0;
+  state.episodeIndex = 0;
+  save();
+  renderToggles();
+  if (ring.length > 0) loadCurrent(false);
 }
 
 function renderSkip() {
@@ -272,16 +344,19 @@ function renderEpisodes(list) {
     episodeListEl.innerHTML = '<div class="empty">No episodes available for this language.</div>';
     return;
   }
+  const playingIndex = audio.paused ? -1 : state.episodeIndex;
   list.forEach((ep, i) => {
+    const isPlaying = i === playingIndex;
     const div = document.createElement("div");
     div.className = "episode-item" + (i === state.episodeIndex ? " active" : "");
     div.innerHTML =
       '<span class="ep-num">' + (i + 1) + ".</span>" +
       '<span class="ep-title">' + escapeHtml(ep.title) + "</span>" +
-      '<span class="ep-dur">' + (ep.desc ? truncate(ep.desc, 60) : "") + "</span>" +
-      '<button class="ep-play" aria-label="Play episode">' + (i === state.episodeIndex && !audio.paused ? "⏸" : "▶") + "</button>";
+      '<span class="ep-dur">' + (ep.desc ? escapeHtml(truncate(ep.desc, 60)) : "") + "</span>" +
+      '<button class="ep-play" aria-label="' + (isPlaying ? "Pause" : "Play") + ' episode">' +
+      '<img src="icons/' + (isPlaying ? "pause" : "play") + '.png" alt="" /></button>';
     div.onclick = (e) => {
-      if (e.target.tagName === "BUTTON") {
+      if (e.target.closest("button")) {
         if (i === state.episodeIndex) togglePlay();
         else playEpisode(i);
         return;
@@ -323,8 +398,7 @@ resetBtn.onclick = () => {
   renderToggles();
   renderSkip();
   save();
-  randomStart();
-  loadCurrent();
+  loadCurrent(false);
 };
 
 document.getElementById("btnPlay").onclick = togglePlay;
@@ -356,23 +430,21 @@ audio.addEventListener("ended", () => {
   advanceRing();
 });
 audio.addEventListener("play", () => {
+  retryAttempts = 0;
+  autoplayWanted = true;
+  lastFailedSrc = null;
   renderEpisodes(currentEpisodes());
+  updatePlayIcon();
   startSkipTimer();
   logStatus("Playing", false);
 });
 audio.addEventListener("pause", () => {
   renderEpisodes(currentEpisodes());
+  updatePlayIcon();
   clearSkipTimer();
 });
 audio.addEventListener("error", () => {
-  logStatus("Playback error. Trying next…");
-  const eps = currentEpisodes();
-  const nextIdx = (state.episodeIndex + 1) % eps.length;
-  if (eps.length && nextIdx !== state.episodeIndex) {
-    playEpisode(nextIdx);
-  } else {
-    advanceRing();
-  }
+  handlePlaybackFailure(audio.error);
 });
 
 // Boot
@@ -382,7 +454,6 @@ audio.addEventListener("error", () => {
   buildRing();
   renderToggles();
   renderSkip();
-  randomStart();
-  await loadCurrent();
+  await loadCurrent(false);
   initialized = true;
 })();

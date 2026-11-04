@@ -1,50 +1,51 @@
 {
   "en": [
-    { "name": "NPR News Now", "url": "https://feeds.npr.org/1001/rss.xml" },
-    { "name": "BBC Global News", "url": "https://feeds.bbci.co.uk/news/world/rss.xml" },
-    { "name": "AP News", "url": "https://feeds.apnews.com/rss/apf-topnews" }
+    { "name": "BBC Global News Podcast", "url": "https://podcasts.files.bbci.co.uk/p02nq0gn.rss" },
+    { "name": "NPR Up First", "url": "https://feeds.npr.org/510318/podcast.xml" },
+    { "name": "FT News Briefing", "url": "https://feeds.acast.com/public/shows/73fe3ede-5c5c-4850-96a8-30db8dbae8bf" }
   ],
   "zh": [
-    { "name": "BBC Chinese", "url": "http://feeds.bbci.co.uk/chinese/rss.xml" },
-    { "name": "CGTN", "url": "https://twitter.com/cgtnofficial/rss" }
+    { "name": "公視每日新聞 Daily News", "url": "https://anchor.fm/s/27b2c13c/podcast/rss" },
+    { "name": "轉角國際新聞 Daily Podcast", "url": "https://feeds.soundon.fm/podcasts/4f4a009b-d95b-4590-85cf-d5e050ead84e.xml" }
   ],
   "hi": [
-    { "name": "BBC Hindi", "url": "http://feeds.bbci.co.uk/hindi/rss.xml" }
+    { "name": "BBC Hindi - दुनिया जहान", "url": "https://podcasts.files.bbci.co.uk/p05525mc.rss" },
+    { "name": "SBS Hindi", "url": "https://sbs-ondemand.streamguys1.com/sbs-hindi/" }
   ],
   "es": [
-    { "name": "BBC Mundo", "url": "http://feeds.bbci.co.uk/mundo/rss.xml" },
-    { "name": "CNN en Espanol", "url": "https://rss.cnn.com/rss/cnn_espanol.rss" }
+    { "name": "SBS Spanish", "url": "https://sbs-ondemand.streamguys1.com/sbs-spanish/" },
+    { "name": "Cadena SER - Hoy por Hoy", "url": "https://fapi-top.prisasd.com/api/v2/feed-rss/playser/hoy-por-hoy/itunestfp" }
   ],
   "fr": [
-    { "name": "BBC French", "url": "http://feeds.bbci.co.uk/french/rss.xml" },
-    { "name": "RFI French", "url": "https://www.rfi.fr/fr/rss" }
+    { "name": "SBS French", "url": "https://sbs-ondemand.streamguys1.com/sbs-french/" },
+    { "name": "HugoDécrypte", "url": "https://feeds.acast.com/public/shows/95497e34-ecc2-596a-b910-bb3342918621" }
   ],
   "ar": [
-    { "name": "BBC Arabic", "url": "http://feeds.bbci.co.uk/arabic/rss.xml" }
+    { "name": "SBS Arabic", "url": "https://sbs-ondemand.streamguys1.com/arabic-newsflash/" }
   ],
   "bn": [
-    { "name": "BBC Bengali", "url": "http://feeds.bbci.co.uk/bengali/rss.xml" }
+    { "name": "SBS Bangla", "url": "https://sbs-ondemand.streamguys1.com/sbs-bangla/" }
   ],
   "pt": [
-    { "name": "BBC Portuguese", "url": "http://feeds.bbci.co.uk/portuguese/rss.xml" }
+    { "name": "SBS Portuguese", "url": "https://sbs-ondemand.streamguys1.com/sbs-portuguese/" },
+    { "name": "CBN - As Notícias Mais Recentes", "url": "https://feeds.megaphone.fm/GLOBO1208079775" }
   ],
   "ru": [
-    { "name": "BBC Russian", "url": "http://feeds.bbci.co.uk/russian/rss.xml" }
+    { "name": "SBS Russian", "url": "https://sbs-ondemand.streamguys1.com/sbs-russian/" },
+    { "name": "Meduza - Что случилось", "url": "https://meduza.io/rss2/podcasts/tekst-nedeli" }
   ],
   "ur": [
-    { "name": "BBC Urdu", "url": "http://feeds.bbci.co.uk/urdu/rss.xml" }
+    { "name": "SBS Urdu", "url": "https://sbs-ondemand.streamguys1.com/sbs-urdu/" }
   ],
   "id": [
-    { "name": "BBC Indonesian", "url": "http://feeds.bbci.co.uk/indonesian/rss.xml" }
+    { "name": "SBS Indonesian", "url": "https://sbs-ondemand.streamguys1.com/sbs-indonesian/" }
   ],
   "ko": [
-    { "name": "Yonhap News", "url": "https://www.yna.co.kr/rss/news.xml" },
-    { "name": "Yonhap Politics", "url": "https://www.yna.co.kr/rss/politics.xml" },
-    { "name": "Yonhap Economy", "url": "https://www.yna.co.kr/rss/economy.xml" }
+    { "name": "SBS Korean", "url": "https://sbs-ondemand.streamguys1.com/sbs-korean/" },
+    { "name": "KBS World News", "url": "http://world.kbs.co.kr/rss/Podcast_News_e.xml" }
   ],
   "it": [
-    { "name": "ANSA Notizie", "url": "https://www.ansa.it/sito/ansait_rss.xml" },
-    { "name": "ANSA Ultima Ora", "url": "https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml" },
-    { "name": "ANSA Europa", "url": "https://www.ansa.it/europa/notizie/rss.xml" }
+    { "name": "SBS Italian", "url": "https://sbs-ondemand.streamguys1.com/sbs-italian/" },
+    { "name": "Sky TG24 - Le news", "url": "https://feeds.megaphone.fm/SIS6177785836" }
   ]
 }

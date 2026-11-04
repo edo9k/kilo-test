@@ -9,6 +9,8 @@ than MAX_AGE_DAYS so only recent episodes are kept.
 import os
 import sys
 import json
+import random
+import logging
 import hashlib
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -18,6 +20,7 @@ from datetime import datetime, timedelta, timezone
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AUDIO_DIR = os.path.join(BASE_DIR, "audio")
 DATA_DIR = os.path.join(BASE_DIR, "data")
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
 FEEDS_FILE = os.path.join(BASE_DIR, "feeds.json")
 MANIFEST_FILE = os.path.join(DATA_DIR, "episodes.json")
 
@@ -25,6 +28,23 @@ MAX_AGE_DAYS = 4
 MAX_EPISODES_PER_LANG = 3
 MAX_SIZE_BYTES = 15 * 1024 * 1024  # "small" episodes only
 USER_AGENT = "Mozilla/5.0 (LangPlayer downloader; contact: admin)"
+
+
+def setup_logging():
+    os.makedirs(LOGS_DIR, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_path = os.path.join(LOGS_DIR, f"download-{stamp}.log")
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logger.handlers.clear()
+    file_handler = logging.FileHandler(log_path, encoding="utf-8")
+    file_handler.setFormatter(formatter)
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+    return log_path
 
 
 def load_feeds():
@@ -36,6 +56,25 @@ def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=25) as resp:
         return resp.read()
+
+
+def fetch_audio(url):
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        length = resp.headers.get("Content-Length")
+        if length and length.isdigit() and int(length) > MAX_SIZE_BYTES:
+            raise ValueError(f"too large ({int(length)} bytes)")
+        chunks = []
+        total = 0
+        while True:
+            chunk = resp.read(65536)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > MAX_SIZE_BYTES:
+                raise ValueError(f"too large (exceeded {MAX_SIZE_BYTES} bytes)")
+            chunks.append(chunk)
+        return b"".join(chunks)
 
 
 def parse_feed(xml_bytes, feed_name, lang):
@@ -82,6 +121,8 @@ def parse_feed(xml_bytes, feed_name, lang):
 
 
 def main():
+    log_path = setup_logging()
+    logging.info("LangPlayer download started (log: %s)", log_path)
     feeds = load_feeds()
     os.makedirs(AUDIO_DIR, exist_ok=True)
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -99,7 +140,7 @@ def main():
                 xml = fetch(feed["url"])
                 all_episodes.extend(parse_feed(xml, feed["name"], lang))
             except Exception as e:
-                print(f"[WARN] {feed['name']} ({lang}): {e}", file=sys.stderr)
+                logging.warning("[WARN] %s (%s): %s", feed["name"], lang, e)
 
         # Keep recent, small, dated episodes only
         recent = []
@@ -113,10 +154,11 @@ def main():
             recent.append(it)
 
         recent.sort(key=lambda x: x["pub_date"], reverse=True)
-        selected = recent[:MAX_EPISODES_PER_LANG]
 
         lang_manifest = []
-        for it in selected:
+        for it in recent:
+            if len(lang_manifest) >= MAX_EPISODES_PER_LANG:
+                break
             h = hashlib.sha256(it["url"].encode("utf-8")).hexdigest()[:16]
             ext = os.path.splitext(it["url"])[1]
             if not ext or len(ext) > 5 or "?" in ext:
@@ -124,14 +166,15 @@ def main():
             fname = h + ext
             fpath = os.path.join(lang_dir, fname)
 
-            if not os.path.exists(fpath) or os.path.getsize(fpath) == 0:
+            cached = os.path.exists(fpath) and 0 < os.path.getsize(fpath) <= MAX_SIZE_BYTES
+            if not cached:
                 try:
-                    data = fetch(it["url"])
+                    data = fetch_audio(it["url"])
                     with open(fpath, "wb") as f:
                         f.write(data)
-                    print(f"[OK] {lang}: {it['title'][:60]}")
+                    logging.info("[OK] %s: %s", lang, it["title"][:60])
                 except Exception as e:
-                    print(f"[WARN] download failed {it['url']}: {e}", file=sys.stderr)
+                    logging.warning("[WARN] download failed %s: %s", it["url"], e)
                     continue
 
             rel_audio = os.path.join("audio", lang, fname).replace(os.sep, "/")
@@ -144,7 +187,9 @@ def main():
                 "guid": it["guid"],
             })
 
+        random.shuffle(lang_manifest)
         manifest[lang] = lang_manifest
+        logging.info("[%s] %d episode(s) selected", lang, len(lang_manifest))
 
     # Prune audio files older than MAX_AGE_DAYS
     now = datetime.now(timezone.utc)
@@ -161,16 +206,17 @@ def main():
                 if now - mtime > timedelta(days=MAX_AGE_DAYS):
                     try:
                         os.remove(fpath)
-                        print(f"[DEL] old: {fpath}")
+                        logging.info("[DEL] old: %s", fpath)
                     except Exception as e:
-                        print(f"[WARN] delete failed {fpath}: {e}", file=sys.stderr)
+                        logging.warning("[WARN] delete failed %s: %s", fpath, e)
 
     with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
     total = sum(len(v) for v in manifest.values())
-    print(f"Manifest written -> {MANIFEST_FILE} ({total} episodes across {len(manifest)} languages)")
+    logging.info("Manifest written -> %s (%d episodes across %d languages)", MANIFEST_FILE, total, len(manifest))
+    return 0 if total > 0 else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
