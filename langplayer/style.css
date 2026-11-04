@@ -5,6 +5,7 @@
 }
 
 :root {
+  color-scheme: dark;
   --bg: #0b0f19;
   --surface: #12192b;
   --surface-hover: #1c2740;
@@ -15,7 +16,27 @@
   --danger: #f87171;
   --border: #1e2a47;
   --ring: rgba(56, 189, 248, 0.35);
+  --icon-filter: invert(1);
+  --art-gradient: linear-gradient(135deg, #1e2a47, #2d3a5f);
+  --shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
   --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --surface-hover: #e9eff7;
+  --text: #0f172a;
+  --text-muted: #5b6b82;
+  --accent: #0284c7;
+  --accent-dim: #0369a1;
+  --danger: #dc2626;
+  --border: #d6e0ec;
+  --ring: rgba(2, 132, 199, 0.3);
+  --icon-filter: none;
+  --art-gradient: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  --shadow: 0 20px 40px -20px rgba(15, 23, 42, 0.25);
 }
 
 html {
@@ -75,7 +96,7 @@ header {
 .icon-btn img {
   width: 20px;
   height: 20px;
-  filter: invert(1);
+  filter: var(--icon-filter);
   pointer-events: none;
 }
 
@@ -204,7 +225,7 @@ input[type=range]::-webkit-slider-thumb {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.25rem;
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow);
 }
 
 .status {
@@ -239,7 +260,7 @@ input[type=range]::-webkit-slider-thumb {
   width: 72px;
   height: 72px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #1e2a47, #2d3a5f);
+  background: var(--art-gradient);
   border: 1px solid var(--border);
   display: grid;
   place-items: center;
@@ -272,6 +293,23 @@ input[type=range]::-webkit-slider-thumb {
 .np-info .np-source {
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.np-link {
+  display: inline-block;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.np-link:hover {
+  text-decoration: underline;
+}
+
+.np-link[hidden] {
+  display: none;
 }
 
 audio {
@@ -308,7 +346,7 @@ audio {
 .ctrl-btn img {
   width: 22px;
   height: 22px;
-  filter: invert(1);
+  filter: var(--icon-filter);
   pointer-events: none;
 }
 
@@ -369,11 +407,103 @@ audio {
   margin-top: 0.3rem;
 }
 
+.playback-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.speed-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.speed-control select {
+  background: var(--surface-hover);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.3rem 0.45rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.speed-control select:hover,
+.speed-control select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
 .skip-info {
   font-size: 0.8rem;
   color: var(--text-muted);
   margin-bottom: 0.75rem;
   min-height: 1.2em;
+}
+
+.playback-options .skip-info {
+  margin-bottom: 0;
+}
+
+/* Theme switch */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.theme-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.theme-toggle input:checked + .toggle-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.theme-toggle input:checked + .toggle-track .toggle-thumb {
+  transform: translateX(20px);
+  background: #fff;
+}
+
+.theme-toggle input:focus-visible + .toggle-track {
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 /* Episodes */
@@ -466,8 +596,27 @@ audio {
 .ep-play img {
   width: 14px;
   height: 14px;
-  filter: invert(1);
+  filter: var(--icon-filter);
   pointer-events: none;
+}
+
+.ep-link {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.ep-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .empty {

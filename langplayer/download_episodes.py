@@ -25,7 +25,7 @@ FEEDS_FILE = os.path.join(BASE_DIR, "feeds.json")
 MANIFEST_FILE = os.path.join(DATA_DIR, "episodes.json")
 
 MAX_AGE_DAYS = 4
-MAX_EPISODES_PER_LANG = 3
+MAX_EPISODES_PER_LANG = 2  # new downloads per language per run
 MAX_SIZE_BYTES = 15 * 1024 * 1024  # "small" episodes only
 USER_AGENT = "Mozilla/5.0 (LangPlayer downloader; contact: admin)"
 
@@ -69,6 +69,39 @@ def load_feeds():
         return json.load(f)
 
 
+def newest_by_provider(recent):
+    """Yield only the newest episode from each provider, in random provider order."""
+    newest = {}
+    for item in recent:
+        if item["source"] not in newest:
+            newest[item["source"]] = item
+
+    items = list(newest.values())
+    random.shuffle(items)
+    yield from items
+
+
+def random_provider_order(recent):
+    """Yield recent episodes grouped by provider in random order, then older rounds."""
+    by_source = {}
+    for item in recent:
+        by_source.setdefault(item["source"], []).append(item)
+
+    sources = list(by_source.keys())
+    random.shuffle(sources)
+    depth = 0
+    while True:
+        added = False
+        for source in sources:
+            queue = by_source[source]
+            if depth < len(queue):
+                yield queue[depth]
+                added = True
+        if not added:
+            break
+        depth += 1
+
+
 def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=25) as resp:
@@ -94,8 +127,19 @@ def fetch_audio(url):
         return b"".join(chunks)
 
 
+def audio_filename(url):
+    h = hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
+    ext = os.path.splitext(url)[1]
+    if not ext or len(ext) > 5 or "?" in ext:
+        ext = ".mp3"
+    return h + ext
+
+
 def parse_feed(xml_bytes, feed_name, lang):
     root = ET.fromstring(xml_bytes)
+    channel = root.find("channel")
+    channel_link_el = channel.find("link") if channel is not None else None
+    channel_link = (channel_link_el.text or "").strip() if channel_link_el is not None and channel_link_el.text else ""
     items = []
     for item in root.findall(".//item"):
         enc = item.find("enclosure")
@@ -124,6 +168,12 @@ def parse_feed(xml_bytes, feed_name, lang):
         desc = (desc_el.text or "").strip() if desc_el is not None else ""
         guid_el = item.find("guid")
         guid = (guid_el.text or url).strip() if guid_el is not None and guid_el.text else url
+        link_el = item.find("link")
+        link = (link_el.text or "").strip() if link_el is not None and link_el.text else ""
+        if not link and guid.startswith(("http://", "https://")):
+            link = guid
+        if not link:
+            link = channel_link or url
         items.append({
             "url": url,
             "size": size,
@@ -131,6 +181,7 @@ def parse_feed(xml_bytes, feed_name, lang):
             "pub_date": pub_date,
             "desc": desc,
             "guid": guid,
+            "link": link,
             "source": feed_name,
             "lang": lang,
         })
@@ -172,28 +223,19 @@ def main():
 
         recent.sort(key=lambda x: x["pub_date"], reverse=True)
 
-        lang_manifest = []
+        seen_urls = set()
+        unique_recent = []
         for it in recent:
-            if len(lang_manifest) >= MAX_EPISODES_PER_LANG:
-                break
-            h = hashlib.sha256(it["url"].encode("utf-8")).hexdigest()[:16]
-            ext = os.path.splitext(it["url"])[1]
-            if not ext or len(ext) > 5 or "?" in ext:
-                ext = ".mp3"
-            fname = h + ext
-            fpath = os.path.join(lang_dir, fname)
+            if it["url"] in seen_urls:
+                continue
+            seen_urls.add(it["url"])
+            unique_recent.append(it)
 
-            cached = os.path.exists(fpath) and 0 < os.path.getsize(fpath) <= MAX_SIZE_BYTES
-            if not cached:
-                try:
-                    data = fetch_audio(it["url"])
-                    with open(fpath, "wb") as f:
-                        f.write(data)
-                    logging.info("[OK] %s: %s", lang, it["title"][:60])
-                except Exception as e:
-                    logging.warning("[WARN] download failed %s: %s", it["url"], e)
-                    continue
+        lang_manifest = []
+        selected_urls = set()
 
+        def add_to_manifest(it):
+            fname = audio_filename(it["url"])
             rel_audio = os.path.join("audio", lang, fname).replace(os.sep, "/")
             lang_manifest.append({
                 "title": it["title"],
@@ -202,7 +244,41 @@ def main():
                 "pub_date": it["pub_date"].isoformat(),
                 "desc": it["desc"][:200],
                 "guid": it["guid"],
+                "link": it["link"],
             })
+            selected_urls.add(it["url"])
+
+        # Prefer genuinely new episodes; skip cached ones so another provider
+        # can supply fresh audio instead.
+        for it in newest_by_provider(unique_recent):
+            if len(lang_manifest) >= MAX_EPISODES_PER_LANG:
+                break
+            fname = audio_filename(it["url"])
+            fpath = os.path.join(lang_dir, fname)
+            if os.path.exists(fpath) and 0 < os.path.getsize(fpath) <= MAX_SIZE_BYTES:
+                continue
+            try:
+                data = fetch_audio(it["url"])
+                with open(fpath, "wb") as f:
+                    f.write(data)
+                logging.info("[OK] %s: %s", lang, it["title"][:60])
+            except Exception as e:
+                logging.warning("[WARN] download failed %s: %s", it["url"], e)
+                continue
+            add_to_manifest(it)
+
+        # If no new episodes were available, keep the player populated with cached ones.
+        if len(lang_manifest) < MAX_EPISODES_PER_LANG:
+            for it in random_provider_order(unique_recent):
+                if len(lang_manifest) >= MAX_EPISODES_PER_LANG:
+                    break
+                if it["url"] in selected_urls:
+                    continue
+                fname = audio_filename(it["url"])
+                fpath = os.path.join(lang_dir, fname)
+                if not (os.path.exists(fpath) and 0 < os.path.getsize(fpath) <= MAX_SIZE_BYTES):
+                    continue
+                add_to_manifest(it)
 
         random.shuffle(lang_manifest)
         manifest[lang] = lang_manifest

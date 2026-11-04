@@ -2,50 +2,79 @@
   "en": [
     { "name": "BBC Global News Podcast", "url": "https://podcasts.files.bbci.co.uk/p02nq0gn.rss" },
     { "name": "NPR Up First", "url": "https://feeds.npr.org/510318/podcast.xml" },
-    { "name": "FT News Briefing", "url": "https://feeds.acast.com/public/shows/73fe3ede-5c5c-4850-96a8-30db8dbae8bf" }
+    { "name": "FT News Briefing", "url": "https://feeds.acast.com/public/shows/73fe3ede-5c5c-4850-96a8-30db8dbae8bf" },
+    { "name": "RNZ News (New Zealand)", "url": "https://www.rnz.co.nz/acast/news-bulletin-podcast.rss" },
+    { "name": "SABC News - First Take SA (South Africa)", "url": "https://www.omnycontent.com/d/playlist/8f7208d2-db6e-4bfa-85b5-ad3d00776f1f/afb6d104-b3b3-43fd-9a97-ad4e00b7c265/b730fcf7-d01e-464a-9510-ad4e00b7c273/podcast.rss" }
   ],
   "zh": [
     { "name": "公視每日新聞 Daily News", "url": "https://anchor.fm/s/27b2c13c/podcast/rss" },
-    { "name": "轉角國際新聞 Daily Podcast", "url": "https://feeds.soundon.fm/podcasts/4f4a009b-d95b-4590-85cf-d5e050ead84e.xml" }
+    { "name": "轉角國際新聞 Daily Podcast", "url": "https://feeds.soundon.fm/podcasts/4f4a009b-d95b-4590-85cf-d5e050ead84e.xml" },
+    { "name": "96.3好FM 整点新闻 (Singapore)", "url": "https://www.omnycontent.com/d/playlist/d9486183-3dd4-4ad6-aebe-a4c1008455d5/c584dd86-47fa-49b5-aa25-b03d00336af4/0b190d90-c1ad-4d0c-8e26-b03d00392d24/podcast.rss" }
   ],
   "hi": [
     { "name": "BBC Hindi - दुनिया जहान", "url": "https://podcasts.files.bbci.co.uk/p05525mc.rss" },
+    { "name": "BBC Hindi - दिनभर", "url": "https://podcasts.files.bbci.co.uk/p09ds7zx.rss" },
     { "name": "SBS Hindi", "url": "https://sbs-ondemand.streamguys1.com/sbs-hindi/" }
   ],
   "es": [
     { "name": "SBS Spanish", "url": "https://sbs-ondemand.streamguys1.com/sbs-spanish/" },
-    { "name": "Cadena SER - Hoy por Hoy", "url": "https://fapi-top.prisasd.com/api/v2/feed-rss/playser/hoy-por-hoy/itunestfp" }
+    { "name": "Cadena SER - Hoy por Hoy", "url": "https://fapi-top.prisasd.com/api/v2/feed-rss/playser/hoy-por-hoy/itunestfp" },
+    { "name": "Aristegui Noticias (México)", "url": "https://feeds.simplecast.com/Vxw2Ix0E" }
   ],
   "fr": [
     { "name": "SBS French", "url": "https://sbs-ondemand.streamguys1.com/sbs-french/" },
-    { "name": "HugoDécrypte", "url": "https://feeds.acast.com/public/shows/95497e34-ecc2-596a-b910-bb3342918621" }
+    { "name": "HugoDécrypte", "url": "https://feeds.acast.com/public/shows/95497e34-ecc2-596a-b910-bb3342918621" },
+    { "name": "Radio-Canada - Le Radiojournal (Canada)", "url": "http://feeds.feedburner.com/LeRadiojournal" }
   ],
   "ar": [
-    { "name": "SBS Arabic", "url": "https://sbs-ondemand.streamguys1.com/arabic-newsflash/" }
+    { "name": "SBS Arabic", "url": "https://sbs-ondemand.streamguys1.com/arabic-newsflash/" },
+    { "name": "Roya News (Jordan)", "url": "https://feeds.transistor.fm/roya-daily-news-podcast" },
+    { "name": "Atheer - إيجاز (Saudi Arabia)", "url": "https://www.omnycontent.com/d/playlist/9c074afa-3313-47e8-b802-a9f900789975/39b6c830-709a-4d93-96aa-ad0b016b412b/13dae36f-3099-43f1-8fc8-ad0b016bb390/podcast.rss" }
   ],
   "bn": [
-    { "name": "SBS Bangla", "url": "https://sbs-ondemand.streamguys1.com/sbs-bangla/" }
+    { "name": "SBS Bangla", "url": "https://sbs-ondemand.streamguys1.com/sbs-bangla/" },
+    { "name": "BDJam সংবাদ (Bangladesh)", "url": "https://bdjam.com/podcast/feed/bn" }
   ],
   "pt": [
     { "name": "SBS Portuguese", "url": "https://sbs-ondemand.streamguys1.com/sbs-portuguese/" },
-    { "name": "CBN - As Notícias Mais Recentes", "url": "https://feeds.megaphone.fm/GLOBO1208079775" }
+    { "name": "CBN - As Notícias Mais Recentes", "url": "https://feeds.megaphone.fm/GLOBO1208079775" },
+    { "name": "Renascença - Noticiários (Portugal)", "url": "https://www.omnycontent.com/d/playlist/58028bcf-e01f-4274-aca7-ad3300f67928/d4d808c0-10fc-4c94-bc85-ad7800a097e2/e96b5334-2b08-4ee7-a9f7-ad7800a099e1/podcast.rss" }
   ],
   "ru": [
     { "name": "SBS Russian", "url": "https://sbs-ondemand.streamguys1.com/sbs-russian/" },
-    { "name": "Meduza - Что случилось", "url": "https://meduza.io/rss2/podcasts/tekst-nedeli" }
+    { "name": "Meduza - Что случилось", "url": "https://meduza.io/rss2/podcasts/tekst-nedeli" },
+    { "name": "Эхо (Russia)", "url": "https://feeds.transistor.fm/11926de5-6204-4069-b183-2caa30b1605c" },
+    { "name": "BBC Russian - Что это было?", "url": "https://podcasts.files.bbci.co.uk/p076qqzl.rss" }
   ],
   "ur": [
-    { "name": "SBS Urdu", "url": "https://sbs-ondemand.streamguys1.com/sbs-urdu/" }
+    { "name": "SBS Urdu", "url": "https://sbs-ondemand.streamguys1.com/sbs-urdu/" },
+    { "name": "NHK World Urdu News (Japan)", "url": "http://www3.nhk.or.jp/rj/podcast/rss/urdu.xml" }
   ],
   "id": [
-    { "name": "SBS Indonesian", "url": "https://sbs-ondemand.streamguys1.com/sbs-indonesian/" }
+    { "name": "SBS Indonesian", "url": "https://sbs-ondemand.streamguys1.com/sbs-indonesian/" },
+    { "name": "KBS World Warta Berita (Korea)", "url": "http://world.kbs.co.kr/rss/Podcast_News_i.xml" },
+    { "name": "Mongabay Indonesia", "url": "https://rss.libsyn.com/shows/570725/destinations/4938620.xml" }
   ],
   "ko": [
     { "name": "SBS Korean", "url": "https://sbs-ondemand.streamguys1.com/sbs-korean/" },
-    { "name": "KBS World News", "url": "http://world.kbs.co.kr/rss/Podcast_News_e.xml" }
+    { "name": "KBS World Korean News", "url": "http://world.kbs.co.kr/rss/Podcast_News_k.xml" }
   ],
   "it": [
     { "name": "SBS Italian", "url": "https://sbs-ondemand.streamguys1.com/sbs-italian/" },
-    { "name": "Sky TG24 - Le news", "url": "https://feeds.megaphone.fm/SIS6177785836" }
+    { "name": "Sky TG24 - Le news", "url": "https://feeds.megaphone.fm/SIS6177785836" },
+    { "name": "Il Post - Globo (Italy)", "url": "https://feeds.megaphone.fm/IPS7485736463" }
+  ],
+  "ja": [
+    { "name": "NHKラジオニュース", "url": "https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml" },
+    { "name": "TBSラジオニュース", "url": "https://feeds.megaphone.fm/TBS9658464326" },
+    { "name": "朝日新聞アルキキ 最新ニュース", "url": "https://www.omnycontent.com/d/playlist/1e3bd144-9b57-451a-93cf-ac0e00e74446/4ed5fcbf-299a-4d2d-bde1-acc4009cef22/ee64c498-786d-4155-962a-acc4009cef3e/podcast.rss" },
+    { "name": "読売新聞音声ニュース", "url": "https://www.omnycontent.com/d/playlist/1ac836f7-a55f-4b30-8e98-aeac011f8199/98d8085a-3352-4712-b1a8-b10f003f4ba3/92340250-9561-4fdb-91a8-b10f0041d8d0/podcast.rss" }
+  ],
+  "de": [
+    { "name": "Deutschlandfunk - Die Nachrichten", "url": "https://www.deutschlandfunk.de/nachrichten-108.xml" },
+    { "name": "tagesschau - Die 20 Uhr Nachrichten", "url": "https://www.tagesschau.de/multimedia/sendung/tagesschau_20_uhr/podcast-ts2000-audio-100~podcast.xml" },
+    { "name": "NDR Info - Nachrichten", "url": "https://www.ndr.de/nachrichten/info/podcast4370.xml" },
+    { "name": "DW - Langsam gesprochene Nachrichten", "url": "https://rss.dw.com/xml/DKpodcast_lgn_de" },
+    { "name": "rbb24 Inforadio - Nachrichten", "url": "https://www.inforadio.de/podcast/feeds/nachrichten/nachrichten.xml/feed=podcast.xml" }
   ]
 }

@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0f172a" />
   <title>LangPlayer</title>
+  <script>
+    try {
+      var saved = JSON.parse(localStorage.getItem("langplayer:v1") || "{}");
+      document.documentElement.dataset.theme = saved.theme === "light" ? "light" : "dark";
+    } catch (e) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -24,6 +32,18 @@
         <input type="range" id="skipRange" min="1" max="30" step="1" value="3" />
       </div>
       <div class="setting-row">
+        <label>Skip the first <span id="startSkipVal">0</span> seconds of each episode</label>
+        <input type="range" id="startSkipRange" min="0" max="120" step="1" value="0" />
+      </div>
+      <div class="setting-row">
+        <label>Appearance</label>
+        <label class="theme-toggle">
+          <input type="checkbox" id="themeToggle" />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          <span id="themeLabel">Dark mode</span>
+        </label>
+      </div>
+      <div class="setting-row">
         <label>Enabled languages</label>
         <div class="lang-toggles" id="langToggles"></div>
       </div>
@@ -41,6 +61,7 @@
             <div class="np-lang" id="npLang">—</div>
             <div class="np-title" id="npTitle">Select a language to begin</div>
             <div class="np-source" id="npSource">—</div>
+            <a class="np-link" id="npLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Open full episode ↗</a>
           </div>
         </div>
 
@@ -62,7 +83,21 @@
           </div>
         </div>
 
-        <div class="skip-info" id="skipInfo">Auto-skip: off</div>
+        <div class="playback-options">
+          <label class="speed-control" for="speedSelect">
+            <span>Speed</span>
+            <select id="speedSelect">
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1×</option>
+              <option value="1.25">1.25×</option>
+              <option value="1.5">1.5×</option>
+              <option value="1.75">1.75×</option>
+              <option value="2">2×</option>
+            </select>
+          </label>
+          <div class="skip-info" id="skipInfo">Auto-skip: off</div>
+        </div>
 
         <div class="episodes" id="episodes">
           <h3>Episodes</h3>

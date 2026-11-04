@@ -1,5 +1,9 @@
 const STORAGE_KEY = "langplayer:v1";
 const DEFAULT_SKIP_MINUTES = 3;
+const DEFAULT_START_SKIP_SECONDS = 0;
+const DEFAULT_PLAYBACK_RATE = 1;
+const DEFAULT_THEME = "dark";
+const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 const JUMP_SECONDS = 10;
 const MAX_PLAY_RETRIES = 2;
 const MANIFEST_URL = "data/episodes.json";
@@ -18,6 +22,8 @@ const LANG_ORDER = [
   { code: "ko", name: "한국어 (Korean)" },
   { code: "id", name: "Bahasa Indonesia (Indonesian)" },
   { code: "it", name: "Italiano (Italian)" },
+  { code: "ja", name: "日本語 (Japanese)" },
+  { code: "de", name: "Deutsch (German)" },
 ];
 
 const audio = document.getElementById("audio");
@@ -36,12 +42,21 @@ const settingsPanel = document.getElementById("settingsPanel");
 const langTogglesEl = document.getElementById("langToggles");
 const skipRange = document.getElementById("skipRange");
 const skipValEl = document.getElementById("skipVal");
+const startSkipRange = document.getElementById("startSkipRange");
+const startSkipValEl = document.getElementById("startSkipVal");
+const themeToggle = document.getElementById("themeToggle");
+const themeLabel = document.getElementById("themeLabel");
+const speedSelect = document.getElementById("speedSelect");
+const npLinkEl = document.getElementById("npLink");
 const resetBtn = document.getElementById("resetBtn");
 const playIconEl = document.getElementById("playIcon");
 
 let state = {
   enabled: {},
   skipMinutes: DEFAULT_SKIP_MINUTES,
+  startSkipSeconds: DEFAULT_START_SKIP_SECONDS,
+  playbackRate: DEFAULT_PLAYBACK_RATE,
+  theme: DEFAULT_THEME,
   langIndex: 0,
   episodeIndex: 0,
   history: [],
@@ -55,6 +70,7 @@ let initialized = false;
 let retryAttempts = 0;
 let autoplayWanted = false;
 let lastFailedSrc = null;
+let lastStartSkipSrc = null;
 
 function logStatus(msg, loading = false) {
   statusEl.textContent = msg;
@@ -65,6 +81,56 @@ function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+function safeUrl(url) {
+  return typeof url === "string" && /^https?:\/\//i.test(url) ? url : null;
+}
+
+function applyTheme() {
+  document.documentElement.dataset.theme = state.theme;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", state.theme === "light" ? "#f4f7fb" : "#0f172a");
+}
+
+function renderTheme() {
+  const isDark = state.theme !== "light";
+  themeToggle.checked = isDark;
+  themeLabel.textContent = isDark ? "Dark mode" : "Light mode";
+}
+
+function applyPlaybackRate() {
+  audio.defaultPlaybackRate = state.playbackRate;
+  audio.playbackRate = state.playbackRate;
+}
+
+function renderSpeed() {
+  speedSelect.value = String(state.playbackRate);
+}
+
+function renderStartSkip() {
+  startSkipRange.value = state.startSkipSeconds;
+  startSkipValEl.textContent = state.startSkipSeconds;
+}
+
+function applyStartSkip() {
+  if (state.startSkipSeconds <= 0) return;
+  const src = audio.currentSrc || audio.src;
+  if (!src || src === lastStartSkipSrc) return;
+  lastStartSkipSrc = src;
+  const target = Math.min(state.startSkipSeconds, Math.max(0, (audio.duration || 0) - 0.5));
+  if (target > 0) audio.currentTime = target;
+}
+
+function renderNowPlayingLink(ep) {
+  const link = safeUrl(ep && ep.link);
+  if (!link) {
+    npLinkEl.hidden = true;
+    npLinkEl.removeAttribute("href");
+    return;
+  }
+  npLinkEl.href = link;
+  npLinkEl.hidden = false;
+}
+
 function loadDefaults() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
@@ -72,6 +138,13 @@ function loadDefaults() {
       const parsed = JSON.parse(raw);
       state.enabled = parsed.enabled || {};
       state.skipMinutes = typeof parsed.skipMinutes === "number" ? parsed.skipMinutes : DEFAULT_SKIP_MINUTES;
+      state.startSkipSeconds = typeof parsed.startSkipSeconds === "number"
+        ? Math.max(0, Math.min(120, parsed.startSkipSeconds))
+        : DEFAULT_START_SKIP_SECONDS;
+      state.playbackRate = PLAYBACK_RATES.includes(parsed.playbackRate)
+        ? parsed.playbackRate
+        : DEFAULT_PLAYBACK_RATE;
+      state.theme = parsed.theme === "light" ? "light" : DEFAULT_THEME;
       state.langIndex = typeof parsed.langIndex === "number" ? parsed.langIndex : 0;
       state.episodeIndex = typeof parsed.episodeIndex === "number" ? parsed.episodeIndex : 0;
       state.history = Array.isArray(parsed.history) ? parsed.history : [];
@@ -90,6 +163,9 @@ function resetState() {
   state.enabled = {};
   LANG_ORDER.forEach((l) => (state.enabled[l.code] = true));
   state.skipMinutes = DEFAULT_SKIP_MINUTES;
+  state.startSkipSeconds = DEFAULT_START_SKIP_SECONDS;
+  state.playbackRate = DEFAULT_PLAYBACK_RATE;
+  state.theme = DEFAULT_THEME;
   state.langIndex = 0;
   state.episodeIndex = 0;
   state.history = [];
@@ -134,6 +210,7 @@ async function loadCurrent(autoplay = true) {
   const eps = currentEpisodes();
   if (!eps.length) {
     logStatus("No episodes for " + currentLang().name);
+    renderNowPlayingLink(null);
     renderEpisodes([]);
     return;
   }
@@ -151,12 +228,15 @@ function playEpisode(index, autoplay = true) {
   retryAttempts = 0;
   autoplayWanted = autoplay;
   lastFailedSrc = null;
+  lastStartSkipSrc = null;
   save();
   const ep = eps[index];
   npLangEl.textContent = currentLang().name;
   npTitleEl.textContent = ep.title;
   npSourceEl.textContent = ep.source;
+  renderNowPlayingLink(ep);
   audio.src = ep.audio;
+  applyPlaybackRate();
   renderEpisodes(eps);
   updatePlayIcon();
   startProgressLoop();
@@ -347,15 +427,20 @@ function renderEpisodes(list) {
   const playingIndex = audio.paused ? -1 : state.episodeIndex;
   list.forEach((ep, i) => {
     const isPlaying = i === playingIndex;
+    const link = safeUrl(ep.link);
     const div = document.createElement("div");
     div.className = "episode-item" + (i === state.episodeIndex ? " active" : "");
     div.innerHTML =
       '<span class="ep-num">' + (i + 1) + ".</span>" +
       '<span class="ep-title">' + escapeHtml(ep.title) + "</span>" +
       '<span class="ep-dur">' + (ep.desc ? escapeHtml(truncate(ep.desc, 60)) : "") + "</span>" +
+      (link
+        ? '<a class="ep-link" href="' + escapeHtml(link) + '" target="_blank" rel="noopener noreferrer" aria-label="Open full episode" title="Open full episode">↗</a>'
+        : "") +
       '<button class="ep-play" aria-label="' + (isPlaying ? "Pause" : "Play") + ' episode">' +
       '<img src="icons/' + (isPlaying ? "pause" : "play") + '.png" alt="" /></button>';
     div.onclick = (e) => {
+      if (e.target.closest("a")) return;
       if (e.target.closest("button")) {
         if (i === state.episodeIndex) togglePlay();
         else playEpisode(i);
@@ -392,11 +477,40 @@ skipRange.onchange = () => {
   startSkipTimer();
 };
 
+startSkipRange.oninput = () => {
+  startSkipValEl.textContent = startSkipRange.value;
+};
+startSkipRange.onchange = () => {
+  state.startSkipSeconds = parseInt(startSkipRange.value, 10) || 0;
+  renderStartSkip();
+  save();
+};
+
+themeToggle.onchange = () => {
+  state.theme = themeToggle.checked ? "dark" : "light";
+  applyTheme();
+  renderTheme();
+  save();
+};
+
+speedSelect.onchange = () => {
+  const rate = parseFloat(speedSelect.value);
+  if (!PLAYBACK_RATES.includes(rate)) return;
+  state.playbackRate = rate;
+  applyPlaybackRate();
+  save();
+};
+
 resetBtn.onclick = () => {
   resetState();
   buildRing();
   renderToggles();
   renderSkip();
+  renderStartSkip();
+  renderSpeed();
+  applyPlaybackRate();
+  applyTheme();
+  renderTheme();
   save();
   loadCurrent(false);
 };
@@ -420,6 +534,8 @@ progressEl.onchange = () => {
 };
 
 audio.addEventListener("loadedmetadata", () => {
+  applyPlaybackRate();
+  applyStartSkip();
   updateProgress();
   durTimeEl.textContent = formatTime(audio.duration);
 });
@@ -450,6 +566,11 @@ audio.addEventListener("error", () => {
 // Boot
 (async () => {
   loadDefaults();
+  applyTheme();
+  renderTheme();
+  renderStartSkip();
+  renderSpeed();
+  applyPlaybackRate();
   await loadManifest();
   buildRing();
   renderToggles();

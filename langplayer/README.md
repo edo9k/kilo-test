@@ -5,9 +5,9 @@ static files (HTML/CSS/JS) with no build dependencies.
 
 ## What it does
 
-- Plays short news podcast episodes in 13 world languages: English, Chinese,
+- Plays short news podcast episodes in 15 world languages: English, Chinese,
   Hindi, Spanish, French, Arabic, Bengali, Portuguese, Russian, Urdu,
-  Indonesian, Korean, Italian.
+  Indonesian, Korean, Italian, Japanese, German.
 - Lets you toggle each language on/off in Settings; disabled languages are
   skipped entirely.
 - Cycles through enabled languages in a ring (next language on episode end, on
@@ -15,20 +15,26 @@ static files (HTML/CSS/JS) with no build dependencies.
   the browser, so navigating around stays consistent.
 - Auto-skips to the next language every X minutes (default 3 min, adjustable 1–30).
 - Play/pause, previous/next episode, jump back/forward 10s, progress bar.
+- Playback speed control from 0.5× to 2×.
+- Link to the source page for every episode, both in now-playing and the list.
+- Optional skip of the first N seconds of each new episode (0–120s).
+- Light and dark themes, toggled from Settings.
 - Retries a failing file up to twice, then auto-skips to the next episode.
 - Restores your last language/episode on reload and waits for Play on first
   load, since browsers block autoplay without a user gesture.
-- Persists all settings (enabled languages, skip minutes, indices) to
-  `localStorage`.
+- Persists all settings (enabled languages, skip minutes, start skip, playback
+  speed, theme, indices) to `localStorage`.
 
 ## Architecture (offline bucket)
 
 The player does **not** fetch RSS live (avoids CORS and proxy dependencies).
 Instead, a Python downloader script runs twice daily on a cronjob, scrapes the
-configured RSS feeds, downloads the 3 most recent small audio episodes per
-language (under 15 MB, published within the last 4 days), writes a
-`data/episodes.json` manifest, and prunes audio and logs older than 4 days. The
-player reads local `audio/<lang>/<file>` files only.
+configured RSS feeds, downloads up to 2 new small audio episodes per language
+per run (under 15 MB, published within the last 4 days). It checks each
+provider's newest episode in random order, skips cached or failed providers,
+and falls back to cached episodes so the player stays populated without extra
+downloads. It writes a `data/episodes.json` manifest and prunes audio and logs
+older than 4 days. The player reads local `audio/<lang>/<file>` files only.
 
 ```
 langplayer/
@@ -87,10 +93,13 @@ or change the auto-skip interval.
 
 Edit `feeds.json` to add/remove RSS feed URLs per language. The downloader
 keeps only items with an `<enclosure type="audio/*">` tag, so use feeds that
-expose audio enclosures.
+expose audio enclosures. Prefer several providers per language, especially from
+the language's home region; the downloader rotates across sources when it picks
+the daily episodes.
 
 ## Data persistence
 
 User settings live in browser `localStorage` under key `langplayer:v1`.
-Clearing site data resets to defaults (all languages enabled, 3 min skip,
-first episode of the first enabled language).
+Clearing site data resets to defaults (all languages enabled, 3 min auto-skip,
+no start skip, 1× speed, dark theme, first episode of the first enabled
+language).
