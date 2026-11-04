@@ -47,6 +47,23 @@ def setup_logging():
     return log_path
 
 
+def prune_old_logs():
+    now = datetime.now(timezone.utc)
+    for fname in os.listdir(LOGS_DIR):
+        if not fname.startswith("download-") or not fname.endswith(".log"):
+            continue
+        fpath = os.path.join(LOGS_DIR, fname)
+        if not os.path.isfile(fpath):
+            continue
+        mtime = datetime.fromtimestamp(os.path.getmtime(fpath), tz=timezone.utc)
+        if now - mtime > timedelta(days=MAX_AGE_DAYS):
+            try:
+                os.remove(fpath)
+                logging.info("[DEL] old log: %s", fpath)
+            except Exception as e:
+                logging.warning("[WARN] log delete failed %s: %s", fpath, e)
+
+
 def load_feeds():
     with open(FEEDS_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -212,6 +229,8 @@ def main():
 
     with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+    prune_old_logs()
 
     total = sum(len(v) for v in manifest.values())
     logging.info("Manifest written -> %s (%d episodes across %d languages)", MANIFEST_FILE, total, len(manifest))

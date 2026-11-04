@@ -16,8 +16,8 @@ For the next person who needs to modify or operate this project.
 | `app.js` | Vanilla JS player, settings, localStorage persistence, manifest-driven, playback retry |
 | `icons/` | PNG control icons from Google Material Design Icons (Apache-2.0) |
 | `feeds.json` | RSS feed URLs per language — **source of truth** for the downloader |
-| `download_episodes.py` | Python cron script: fetch RSS → download audio → write manifest → prune |
-| `cronjob.txt` | Example crontab entry (daily at 06:00) |
+| `download_episodes.py` | Python cron script: fetch RSS → download audio → shuffle → write manifest → prune audio/logs |
+| `cronjob.txt` | Example crontab entry (twice daily at 03:00 and 15:00) |
 | `README.md` | User-facing setup & usage docs |
 | `data/episodes.json` | Generated manifest (consumed by `app.js`) |
 | `audio/<lang>/` | Generated downloaded audio files |
@@ -25,8 +25,9 @@ For the next person who needs to modify or operate this project.
 
 ## How it works (data flow)
 
-1. `download_episodes.py` runs daily via cron. It opens a new
-   `logs/download-<timestamp>.log` on every run (also echoes to stdout).
+1. `download_episodes.py` runs twice daily (03:00 and 15:00) via cron. It opens
+   a new `logs/download-<timestamp>.log` on every run (also echoes to stdout)
+   and prunes logs older than 4 days.
 2. For each language in `feeds.json`, it fetches each RSS feed, keeps items
    that have an `audio/*` `<enclosure>`, were published within the last 4
    days, and claim a size under 15 MB.
@@ -107,9 +108,13 @@ enclosures before adding it to `feeds.json`.
   `random.shuffle(lang_manifest)` in `download_episodes.py` if you want a stable
   newest-first order instead.
 
+### Change the cron schedule
+- Update `cronjob.txt`, then install the same line with `crontab -e` on the
+  server. The current example runs at 03:00 and 15:00 server time.
+
 ### Change max episode age / size / count per language
 - Edit `MAX_AGE_DAYS`, `MAX_SIZE_BYTES`, `MAX_EPISODES_PER_LANG` in
-  `download_episodes.py`.
+  `download_episodes.py`. `MAX_AGE_DAYS` also controls log retention.
 
 ### Player shows "No episode data"
 - The manifest is missing or empty. Run `download_episodes.py` manually once,
@@ -129,8 +134,11 @@ enclosures before adding it to `feeds.json`.
 ## Technology stack
 
 - Frontend: vanilla HTML/CSS/JS (ES2019+, no build step, no dependencies).
+- Icons: PNGs from Google Material Design Icons (Apache-2.0), stored in
+  `icons/` and styled with CSS filters.
 - Backend/cron: Python 3 standard library only (`urllib`, `xml.etree`,
-  `email.utils`, `json`, `hashlib`, `datetime`, `logging`, `sys`).
+  `email.utils`, `json`, `hashlib`, `datetime`, `logging`, `random`, `os`,
+  `sys`).
 - Storage: browser `localStorage` for user settings; server filesystem for
   audio + manifest + logs.
 

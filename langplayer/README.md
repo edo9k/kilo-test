@@ -16,17 +16,19 @@ static files (HTML/CSS/JS) with no build dependencies.
 - Auto-skips to the next language every X minutes (default 3 min, adjustable 1–30).
 - Play/pause, previous/next episode, jump back/forward 10s, progress bar.
 - Retries a failing file up to twice, then auto-skips to the next episode.
+- Restores your last language/episode on reload and waits for Play on first
+  load, since browsers block autoplay without a user gesture.
 - Persists all settings (enabled languages, skip minutes, indices) to
   `localStorage`.
 
 ## Architecture (offline bucket)
 
 The player does **not** fetch RSS live (avoids CORS and proxy dependencies).
-Instead, a Python downloader script runs daily on a cronjob, scrapes the
+Instead, a Python downloader script runs twice daily on a cronjob, scrapes the
 configured RSS feeds, downloads the 3 most recent small audio episodes per
 language (under 15 MB, published within the last 4 days), writes a
-`data/episodes.json` manifest, and prunes audio older than 4 days. The player
-reads local `audio/<lang>/<file>` files only.
+`data/episodes.json` manifest, and prunes audio and logs older than 4 days. The
+player reads local `audio/<lang>/<file>` files only.
 
 ```
 langplayer/
@@ -47,7 +49,9 @@ langplayer/
 ### 1. Serve the files
 
 `langplayer/` is static. Serve it with any web server (Nginx, Apache,
-`python3 -m http.server`, Caddy, etc.). No build step required.
+`python3 -m http.server`, Caddy, etc.). No build step required. Keep `index.html`,
+`style.css`, `app.js`, and `icons/` together — the controls reference the PNG
+files in `icons/`.
 
 ### 2. Install the downloader on your server
 
@@ -57,12 +61,13 @@ Copy `download_episodes.py` and `feeds.json` to your server, then install the
 cronjob from `cronjob.txt`:
 
 ```crontab
-0 6 * * * /usr/bin/python3 /absolute/path/to/langplayer/download_episodes.py
+0 3,15 * * * /usr/bin/python3 /absolute/path/to/langplayer/download_episodes.py
 ```
 
-This runs every day at 06:00 server time. Adjust the time as needed. Every run
-writes a separate timestamped log to `langplayer/logs/download-<timestamp>.log`
-(that directory is git-ignored).
+This runs twice a day at 03:00 and 15:00 server time. Adjust the times as
+needed. Every run writes a separate timestamped log to
+`langplayer/logs/download-<timestamp>.log`; logs older than 4 days are pruned
+automatically (that directory is git-ignored).
 
 Run the script once manually before opening the player:
 

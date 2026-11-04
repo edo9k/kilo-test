@@ -1,0 +1,18 @@
+# Generated content (created by download_episodes.py)
+/audio/
+/data/
+
+# Logs (directory keeps its own .gitignore)
+/logs/*
+!/logs/.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
